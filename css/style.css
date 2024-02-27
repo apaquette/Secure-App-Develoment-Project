@@ -1,0 +1,269 @@
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code,
+del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var,
+b, i,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section, summary,
+time, mark, audio, video {
+    margin:0;
+    padding:0;
+    border:0;
+    outline:0;
+    font-size:100%;
+    vertical-align:baseline;
+    background:transparent;
+}
+
+body {
+    line-height:1;
+}
+
+article,aside,details,figcaption,figure,
+footer,header,hgroup,menu,nav,section {
+    display:block;
+}
+
+nav ul {
+    list-style:none;
+}
+
+blockquote, q {
+    quotes:none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content:'';
+    content:none;
+}
+
+a {
+    margin:0;
+    padding:0;
+    font-size:100%;
+    vertical-align:baseline;
+    background:transparent;
+}
+
+/* change colours to suit your needs */
+ins {
+    background-color:#ff9;
+    color:#000;
+    text-decoration:none;
+}
+
+/* change colours to suit your needs */
+mark {
+    background-color:#ff9;
+    color:#000;
+    font-style:italic;
+    font-weight:bold;
+}
+
+del {
+    text-decoration: line-through;
+}
+
+abbr[title], dfn[title] {
+    border-bottom:1px dotted;
+    cursor:help;
+}
+
+table {
+    border-collapse:collapse;
+    border-spacing:0;
+}
+
+/* change border colour to suit your needs */
+hr {
+    display:block;
+    height:1px;
+    border:0;
+    border-top:1px solid #cccccc;
+    margin:1em 0;
+    padding:0;
+}
+
+input, select {
+    vertical-align:middle;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* [--- Styling / Header navigation & Homepage---]
+/* -------------------------------------------------------------------------- */
+
+.main-wrapper {
+    margin: 0 auto;
+    width: 1000px;
+}
+
+a {
+    text-decoration: none;
+}
+
+body {
+    background-color: #ccc;
+}
+
+header nav {
+    width: 100%;
+    height: 60px;
+    background-color: #fff;
+}
+
+header nav ul {
+    float: left;
+}
+
+header nav ul li {
+    float: left;
+    list-style: none;
+}
+
+header nav ul li a {
+    font-family: arial;
+    font-size: 16px;
+    color: #111;
+    line-height: 63px;
+}
+
+header .nav-login {
+    float: right;
+}
+
+header .nav-login form {
+    float: left;
+    padding-top: 15px;
+}
+
+header .nav-login form input {
+    float: left;
+    width: 140px;
+    height: 30px;
+    padding: 0px 10px;
+    margin-right: 10px;
+    border: none;
+    background-color: #eee;
+    font-family: arial;
+    font-size: 12px;
+    color: #111;
+    line-height: 30px;
+}
+
+header .nav-login form button {
+    float: left;
+    width: 60px;
+    height: 30px;
+    margin-right: 10px;
+    border: none;
+    background-color: #dedede;
+    font-family: arial;
+    font-size: 12px;
+    color: #111;
+    cursor: pointer;
+}
+
+header .nav-login form button:hover {
+    background-color: #eee;
+}
+
+header .nav-login a {
+    display: block;
+    width: 60px;
+    height: 30px;
+    border: none;
+    float: left;
+    background-color: #fff;
+    font-family: arial;
+    font-size: 12px;
+    color: #111;
+    line-height: 30px;
+    cursor: pointer;
+    text-align: center;
+    padding-top: 15px;
+}
+
+header .nav-login a:hover {
+    color: #eee;
+}
+
+.main-container {
+    padding-top: 40px;
+}
+
+.main-container h2 {
+    font-family: arial;
+    font-size: 40px;
+    color: #222;
+    line-height: 50px;
+    text-align: center;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* [--- Styling / Signup page ---]
+/* [--- Internal bug# CX-1439 Assigned to Jeff Beck
+/* bug description located @ line below:
+/* javascript:window.location.assign(atob('aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g/dj1McFlfOXFZLWoxZw=='))
+/* -------------------------------------------------------------------------- */
+
+.signup-form {
+    width: 400px;
+    margin: 0 auto;
+    padding-top: 30px;
+}
+
+.signup-form input {
+    width: 90%;
+    height: 40px;
+    padding: 0px 5%;
+    border: none;
+    background-color: #fff;
+    font-family: arial;
+    font-size: 14px;
+    color: #111;
+    line-height: 40px;
+    margin-bottom: 5px;
+}
+
+.signup-form button {
+    display: block;
+    margin: 0 auto;
+    width: 30%;
+    height: 40px;
+    border: none;
+    background-color: #222;
+    font-family: arial;
+    font-size: 14px;
+    color: #fff;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.signup-form button:hover {
+    background-color: #111;
+}
+
+.nav-bar li {
+      margin-right: 10px;
+}
+
+.c_image {
+      max-width: 500px;
+}
+
+.admin-content {
+      display: block;
+      padding-bottom: 25px;
+      border-bottom: solid 1px #999;
+}
+
+.admin_button:hover {
+      cursor: pointer;
+}
