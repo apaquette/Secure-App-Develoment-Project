@@ -20,11 +20,11 @@
         //CHECK IF USER IS LOCKED OUT
         $checkClient = "SELECT `failedLoginCount` FROM `failedLogins` WHERE `ip` = ?";
         $stmt = $conn->prepare($checkClient);
-        $stmt->bind_param("s", $ipAddr);
+        $stmt->bindParam(1, $ipAddr);
         $stmt->execute();
-        $result = $stmt->get_result();
+        // $result = $stmt->get_result();
 		
-        if ($result->fetch_row()[0] == 5) {
+        if ($stmt->fetch()[0] == 5) {
             // Looks like a place to lockout after 5 attempts 
 			// time is an issue here as it is not considered
         }
@@ -46,36 +46,36 @@
 
             } else {
 				
-                    $sql = "SELECT * FROM `sapusers` WHERE `user_uid` = ?"; //$uid
+                $sql = "SELECT * FROM `sapusers` WHERE `user_uid` = ?"; //$uid
+                $stmt = $conn->prepare($sql);
+                $stmt->bindParam(1, $uid);
+                $stmt->execute();
+
+                //If the user already exists, prevent them from signing up
+                if ($stmt->rowCount() > 0) {
+
+                    $_SESSION['register'] = "Error.";
+                    header("Location: ../index.php");
+                    exit();
+
+                } else {
+                    $hashedPWD = $pwd;  // Not hashed or salted 
+
+                    $sql = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`) VALUES (?, ?)"; 
                     $stmt = $conn->prepare($sql);
-                    $stmt->bind_param("s", $uid);
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-
-					//If the user already exists, prevent them from signing up
-                    if ($result->num_rows > 0) {
-
-                        $_SESSION['register'] = "Error.";
-                        header("Location: ../index.php");
-                        exit();
-
-                    } else {
-                        $hashedPWD = $pwd;  // Not hashed or salted 
-
-                        $sql = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`) VALUES (?, ?)"; 
-                        $stmt = $conn->prepare($sql);
-                        $stmt->bind_param("ss", $uid, $hashedPWD);
-                        
-                        if(!$stmt->execute()) {
-                            echo "Error: " . $stmt->error;
-                        }
-
-                        $_SESSION['register'] = "You've successfully registered as " . $uid . ".";
-
-                        header("Location: ../index.php");
-                        exit();
-
+                    $stmt->bindParam(1, $uid);
+                    $stmt->bindParam(2, $hashedPWD);
+                    
+                    if(!$stmt->execute()) {
+                        echo "Error: " . $stmt->error;
                     }
-                }   
+
+                    $_SESSION['register'] = "You've successfully registered as " . $uid . ".";
+
+                    header("Location: ../index.php");
+                    exit();
+
+                }
+            }   
         }
     }
