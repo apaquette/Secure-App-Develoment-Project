@@ -26,18 +26,19 @@ if (isset($_POST['submit'])) {
     //Does this client has previous failed login attempts?
     $checkClient = "SELECT `failedLoginCount`, `timeStamp` FROM `failedLogins` WHERE `ip` = ?";
     $stmt = $conn->prepare($checkClient);
-    $stmt->bind_param("s", $ipAddr);
-    $stmt->execute();
-    $result = $stmt->get_result(); 
+    $stmt->bindParam(1, $ipAddr);
+    $result = $stmt->execute();
+    // $result = $stmt->get_result(); 
     $time = date("Y-m-d H:i:s");
 
     //New user, insert into database and login
     //"Initialise" attempts recording their IP, timestamp and setup a failed login count, based off IP and attempted uid
-    if ($result->num_rows == 0) {
+    if ($stmt->rowCount() == 0) {
 
         $addUser = "INSERT INTO `failedLogins` (`ip`, `timeStamp`, `failedLoginCount`, `lockOutCount`) VALUES (?, ?, '0', '0')"; //'$ipAddr', '$time'
         $stmt = $conn->prepare($addUser);
-        $stmt->bind_param("ss", $ipAddr, $time);
+        $stmt->bindParam(1, $ipAddr);
+        $stmt->bindParam(2, $time);
 
         if(!$stmt->execute()) {
             die("Error: " . $stmt->error);
@@ -49,28 +50,28 @@ if (isset($_POST['submit'])) {
     } else {
         $getCount = "SELECT `failedLoginCount` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
         $stmt = $conn->prepare($getCount);
-        $stmt->bind_param("s", $ipAddr);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmt->bindParam(1, $ipAddr);
+        $result = $stmt->execute();
+        // $result = $stmt->get_result();
 
             if (!$result) {
                 die("Error: " . $stmt->error);
             } else { 
                 //Assign count in variable so we can compare it for each failed login
-                $failedLoginCount = ($result->fetch_row()[0]);
+                $failedLoginCount = $stmt->fetch()[0];
 
                 if ($failedLoginCount >= 5) {
                     //Assuming theres 5 failed logins from this IP now check the timestamp to lock them out for 3 minutes
                     $checkTime = "SELECT `timeStamp` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
                     $stmt = $conn->prepare($checkTime);
-                    $stmt->bind_param("s", $ipAddr);
-                    $stmt->execute();
-                    $result = $stmt->get_result();
+                    $stmt->bindParam(1, $ipAddr);
+                    $result = $stmt->execute();
+                    // $result = $stmt->get_result();
 
                     if(!$result) {
                         die('Error: ' . $stmt->error);
                     } else {
-                        $failedLoginTime = ($result->fetch_row()[0]);
+                        $failedLoginTime = ($stmt->fetch()[0]);
                     }
 
                     $currTime = date("Y-m-d H:i:s");
@@ -84,8 +85,10 @@ if (isset($_POST['submit'])) {
                         $time = date("Y-m-d H:i:s");
                         $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'fail')"; //$ipAddr, $time, $uid
                         $stmt = $conn->prepare($recordLogin);
-                        $stmt->bind_param("sss", $ipAddr, $time, cleanChars($uid));
-                        $stmt->execute();
+                        $stmt->bindParam(1, $ipAddr);
+                        $stmt->bindParam(2, $time);
+                        $stmt->bindParam(3, cleanChars($uid));
+                        // $result = $stmt->execute();
 
                         if(!$stmt->execute()) {
                             die("Errory: " . $stmt->error);
@@ -98,7 +101,7 @@ if (isset($_POST['submit'])) {
                         //Update lockOutCount
                         $updateLockOutCount = "UPDATE `failedLogins` SET `lockOutCount` = `lockOutCount` + 1 WHERE `ip` = ?"; //$ipAddr
                         $stmt = $conn->prepare($updateLockOutCount);
-                        $stmt->bind_param("s", $ipAddr);
+                        $stmt->bindPram(1, $ipAddr);
 
                         if(!$stmt->execute()) {
                             die("Errorz: " . $stmt->error);
@@ -108,7 +111,8 @@ if (isset($_POST['submit'])) {
                             $currTime = date("Y-m-d H:i:s");
                             $updateCount = "UPDATE `failedLogins` SET `failedLoginCount` = '0', `timeStamp` = ? WHERE `ip` = ?"; //$currTime, $ipAddr
                             $stmt = $conn->prepare($updateCount);
-                            $stmt->bind_param("ss", $currTime, $ipAddr);
+                            $stmt->bindParam(1, $currTime);
+                            $stmt->bindParam(2, $ipAddr);
 
                             if(!$stmt->execute()) {
                                 die("Error: " . $stmt->error);
@@ -137,22 +141,24 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
     } else {
 
 		try{
-		$sql = "SELECT * FROM sapusers WHERE user_uid = '" .$uid. "' and user_pwd ='" .$pwd. "'";
-		$result = $conn->query($sql);
+		// $sql = "SELECT * FROM sapusers WHERE user_uid = '" .$uid. "' and user_pwd ='" .$pwd. "'";
+        $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ? and user_pwd = ?");
+        $stmt->bindParam(1, $uid);
+        $stmt->bindParam(2, $pwd);
+		$result = $stmt->execute();
 		
 		}catch (Exception $e) {
 			echo 'Caught exception: ',  $e->getMessage(), "\n";
 			failedLogin($e->getMessage(),$ipAddr);
 		}
 		
-        if ($result->num_rows < 1) {
+        if (!$result || $stmt->rowCount() < 1) {
             
             //failedLogin($sql,$ipAddr);
 			failedLogin($uid,$ipAddr);
 
         } else {
-
-            if ($row = mysqli_fetch_assoc($result)) {
+            if ($row = $stmt->fetch()) {
                 //Check password
 				
 				// $pwd inputted from user
@@ -172,7 +178,9 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
                     $time = date("Y-m-d H:i:s");
                     $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'success')"; 
                     $stmt = $conn->prepare($recordLogin);
-                    $stmt->bind_param("sss", $ipAddr, $time, cleanChars($uid));
+                    $stmt->bindParam(1, $ipAddr);
+                    $stmt->bindParam(2, $time);
+                    $stmt->bindParam(3, cleanChars($uid));
 
                     if(!$stmt->execute()) {
                         die("Errorx: " . $stmt->error);
@@ -195,7 +203,9 @@ function failedLogin ($uid,$ipAddr) {
     $time = date("Y-m-d H:i:s");
     $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'fail')"; //$ipAddr, $time, $uid
     $stmt = $conn->prepare($recordLogin);
-    $stmt->bind_param("sss", $ipAddr, $time, cleanChars($uid));
+    $stmt->bindParam(1, $ipAddr);
+    $stmt->bindParam(2, $time);
+    $stmt->bindParam(3, cleanChars($uid));
 
     if(!$stmt->execute()) {
         die("Error 1: " . $stmt->error);
@@ -204,7 +214,8 @@ function failedLogin ($uid,$ipAddr) {
         $currTime = date("Y-m-d H:i:s");
         $updateCount = "UPDATE `failedLogins` SET `failedLoginCount` = `failedLoginCount` + 1, `timeStamp` = ? WHERE `ip` = ?"; //$currTime, $ipAddr
         $stmt = $conn->prepare($updateCount);
-        $stmt->bind_param("ss", $currTime, $ipAddr);
+        $stmt->bindParam(1, $currTime);
+        $stmt->bindParam(2, $ipAddr);
 
         if(!$stmt->execute()) {
             die("Error 2: " . $stmt->error);
