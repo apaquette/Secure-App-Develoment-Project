@@ -28,7 +28,6 @@ if (isset($_POST['submit'])) {
     $stmt = $conn->prepare($checkClient);
     $stmt->bindParam(1, $ipAddr);
     $result = $stmt->execute();
-    // $result = $stmt->get_result(); 
     $time = date("Y-m-d H:i:s");
 
     //New user, insert into database and login
@@ -51,10 +50,8 @@ if (isset($_POST['submit'])) {
         $getCount = "SELECT `failedLoginCount` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
         $stmt = $conn->prepare($getCount);
         $stmt->bindParam(1, $ipAddr);
-        $result = $stmt->execute();
-        // $result = $stmt->get_result();
 
-            if (!$result) {
+            if (!$stmt->execute()) {
                 die("Error: " . $stmt->error);
             } else { 
                 //Assign count in variable so we can compare it for each failed login
@@ -66,7 +63,6 @@ if (isset($_POST['submit'])) {
                     $stmt = $conn->prepare($checkTime);
                     $stmt->bindParam(1, $ipAddr);
                     $result = $stmt->execute();
-                    // $result = $stmt->get_result();
 
                     if(!$result) {
                         die('Error: ' . $stmt->error);
@@ -88,7 +84,6 @@ if (isset($_POST['submit'])) {
                         $stmt->bindParam(1, $ipAddr);
                         $stmt->bindParam(2, $time);
                         $stmt->bindParam(3, cleanChars($uid));
-                        // $result = $stmt->execute();
 
                         if(!$stmt->execute()) {
                             die("Errory: " . $stmt->error);
@@ -145,16 +140,14 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
         $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ? and user_pwd = ?");
         $stmt->bindParam(1, $uid);
         $stmt->bindParam(2, $pwd);
-		$result = $stmt->execute();
 		
 		}catch (Exception $e) {
 			echo 'Caught exception: ',  $e->getMessage(), "\n";
 			failedLogin($e->getMessage(),$ipAddr);
 		}
 		
-        if (!$result || $stmt->rowCount() < 1) {
+        if (!$stmt->execute() || $stmt->rowCount() < 1) {
             
-            //failedLogin($sql,$ipAddr);
 			failedLogin($uid,$ipAddr);
 
         } else {
@@ -229,5 +222,5 @@ function failedLogin ($uid,$ipAddr) {
 
 function cleanChars($val)
 {
-return $val;
+    return $val;
 }
