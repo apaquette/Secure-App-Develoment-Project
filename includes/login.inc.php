@@ -1,17 +1,16 @@
 <?php
-
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
 
 if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
     $ipAddr=$_SERVER['HTTP_CLIENT_IP'];
 } elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $ipAddr=$_SERVER['HTTP_X_FORWARDED_FOR'];
-}
-  else {
+} else {
     $ipAddr=$_SERVER['REMOTE_ADDR'];
 }
 
 session_start();
-
 
 
 if (isset($_POST['submit'])) {
@@ -128,61 +127,53 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
     // Errors handlers
     // Check if inputs are empty
     if (empty($uid) || empty($pwd)) {
-
         header("Location: ../index.php?login=empty");
         failedLogin($uid,$ipAddr);
-        exit();
+        exit(); //early exit
+    }
 
-    } else {
-
-		try{
-		// $sql = "SELECT * FROM sapusers WHERE user_uid = '" .$uid. "' and user_pwd ='" .$pwd. "'";
+    try{
         $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ? and user_pwd = ?");
         $stmt->bindParam(1, $uid);
         $stmt->bindParam(2, $pwd);
-		
-		}catch (Exception $e) {
-			echo 'Caught exception: ',  $e->getMessage(), "\n";
-			failedLogin($e->getMessage(),$ipAddr);
-		}
-		
-        if (!$stmt->execute() || $stmt->rowCount() < 1) {
-            
-			failedLogin($uid,$ipAddr);
+    }catch (Exception $e) {
+        echo 'Caught exception: ',  $e->getMessage(), "\n";
+        failedLogin($e->getMessage(),$ipAddr);
+    }
 
+    if (!$stmt->execute() || $stmt->rowCount() < 1) {
+        failedLogin($uid,$ipAddr);
+        exit();
+    }
+
+    if ($row = $stmt->fetch()) {
+        //Check password
+        
+        // $pwd inputted from user
+        $hashedPwdCheck = $row['user_pwd'];
+
+        if (strcmp($hashedPwdCheck, $pwd) !== 0){
+            failedLogin($uid,$ipAddr);
+            exit();
+        }
+        //Initiate session
+        $_SESSION['u_id'] = $row['user_id'];
+        $_SESSION['u_uid'] = $row['user_uid'];
+        $_SESSION['u_admin'] = $row['user_admin']; //Will be 0 for non admin users
+        
+        //Store successful login attempt, uid, timestamp, IP in log format for viewing at admin.php
+        $time = date("Y-m-d H:i:s");
+        $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'success')"; 
+        $stmt = $conn->prepare($recordLogin);
+        $stmt->bindParam(1, $ipAddr);
+        $stmt->bindParam(2, $time);
+        $stmt->bindParam(3, cleanChars($uid));
+
+        if(!$stmt->execute()) {
+            die("Errorx: " . $stmt->error);
         } else {
-            if ($row = $stmt->fetch()) {
-                //Check password
-				
-				// $pwd inputted from user
-                $hashedPwdCheck = $row['user_pwd'];
-
-                if (strcmp($hashedPwdCheck, $pwd) !== 0){
-
-                    failedLogin($uid,$ipAddr);
-
-                } else{
-                    //Initiate session
-                    $_SESSION['u_id'] = $row['user_id'];
-                    $_SESSION['u_uid'] = $row['user_uid'];
-                    $_SESSION['u_admin'] = $row['user_admin']; //Will be 0 for non admin users
-                    
-                    //Store successful login attempt, uid, timestamp, IP in log format for viewing at admin.php
-                    $time = date("Y-m-d H:i:s");
-                    $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'success')"; 
-                    $stmt = $conn->prepare($recordLogin);
-                    $stmt->bindParam(1, $ipAddr);
-                    $stmt->bindParam(2, $time);
-                    $stmt->bindParam(3, cleanChars($uid));
-
-                    if(!$stmt->execute()) {
-                        die("Errorx: " . $stmt->error);
-                    } else {
-                        header("Location: ../auth1.php");
-                        exit();
-                    }
-                }
-            }
+            header("Location: ../auth1.php");
+            exit();
         }
     }
 } 
@@ -220,7 +211,6 @@ function failedLogin ($uid,$ipAddr) {
     
 }
 
-function cleanChars($val)
-{
-    return $val;
+function cleanChars($val){
+    return htmlspecialchars($val);
 }

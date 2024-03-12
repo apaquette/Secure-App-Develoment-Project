@@ -1,8 +1,8 @@
 <?php
       include_once 'header.php';
-	  include_once 'includes/dbh.inc.php';
+      include_once 'includes/dbh.inc.php';
 
-		//Validation here to prevent normal user from accessing directly
+      //Validation here to prevent normal user from accessing directly
       if (!isset($_SESSION['u_id']) || $_SESSION['u_admin'] == 0) {
             
       } else {
