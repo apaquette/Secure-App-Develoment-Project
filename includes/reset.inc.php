@@ -20,7 +20,7 @@ if (!isset($_GET['reset'],$_SESSION['u_uid'])) {
 
         $checkOld = "SELECT * FROM `sapusers` WHERE `user_uid` = ?"; //$uid
         $stmt = $conn->prepare($checkOld);
-        $stmt->bind_param("s", $uid);
+        $stmt->bindParam(1, $uid);
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -38,7 +38,8 @@ if (!isset($_GET['reset'],$_SESSION['u_uid'])) {
 
                     $changePass = "UPDATE `sapusers` SET `user_pwd` = ? WHERE `user_uid` = ?"; //$newpass, $uid
                     $stmt = $conn->prepare($changePass);
-                    $stmt->bind_param("ss", $newpass, $uid);
+                    $stmt->bindParam(1, $newpass);
+                    $stmt->bindParam(2, $uid);
                             
                     if(!$stmt->execute()) {
                         echo "Error: " . $stmt->error;
