@@ -16,16 +16,17 @@
                   <h2>Login Events</h2>
                   <div class="admin-entry-count">
                         <?php
-                              $entry_total_result = mysqli_query($conn, "SELECT count(event_id) AS num_rows FROM loginevents");
-                              $row = mysqli_fetch_object($entry_total_result);
-                              $total = $row->num_rows;
+                              $stmt = $conn->prepare("SELECT count(event_id) AS num_rows FROM loginevents");
+                              $stmt->execute();
+                              $total = $stmt->fetch()[0];
                         ?>
                         <p><i>Total entry count: <?php echo $total; ?></i></p>
                   </div>
                   <?php
-
-                        $query = mysqli_query($conn, "SELECT * FROM loginevents");
-                        while ($row = mysqli_fetch_array($query)) {
+                        $stmt = $conn->prepare("SELECT * FROM loginevents");
+                        $stmt->execute();
+                        
+                        while ($row = $stmt->fetch()) {
                               $id = $row['event_id'];
                               $ipAddr = $row['ip'];
                               $time = $row['timeStamp'];
