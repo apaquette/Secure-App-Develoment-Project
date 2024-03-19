@@ -18,8 +18,8 @@ if (isset($_POST['submit'])) {
     include 'dbh.inc.php';
 
     //Sanitize inputs
-    $uid = $_POST['uid'];
-    $pwd = $_POST['pwd'];
+    $uid = cleanChars($_POST['uid']);
+    $pwd = cleanChars($_POST['pwd']);
     $ipAddr = $ipAddr;
 
     //Does this client has previous failed login attempts?
