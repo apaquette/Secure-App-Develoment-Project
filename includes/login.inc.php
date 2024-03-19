@@ -43,84 +43,87 @@ if (isset($_POST['submit'])) {
         }
 
         processLogin($conn,$uid,$pwd,$ipAddr);
+        exit(); // early exit
         
-        //Handle subsequent visits for each client
-    } else {
-        $getCount = "SELECT `failedLoginCount` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
-        $stmt = $conn->prepare($getCount);
-        $stmt->bindParam(1, $ipAddr);
+    }
 
-            if (!$stmt->execute()) {
-                die("Error: " . $stmt->error);
-            } else { 
-                //Assign count in variable so we can compare it for each failed login
-                $failedLoginCount = $stmt->fetch()[0];
+    //Handle subsequent visits for each client
+    $getCount = "SELECT `failedLoginCount` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
+    $stmt = $conn->prepare($getCount);
+    $stmt->bindParam(1, $ipAddr);
 
-                if ($failedLoginCount >= 5) {
-                    //Assuming theres 5 failed logins from this IP now check the timestamp to lock them out for 3 minutes
-                    $checkTime = "SELECT `timeStamp` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
-                    $stmt = $conn->prepare($checkTime);
-                    $stmt->bindParam(1, $ipAddr);
-                    $result = $stmt->execute();
+    if (!$stmt->execute()) {
+        die("Error: " . $stmt->error);
+    } else { 
+        //Assign count in variable so we can compare it for each failed login
+        $failedLoginCount = $stmt->fetch()[0];
 
-                    if(!$result) {
-                        die('Error: ' . $stmt->error);
-                    } else {
-                        $failedLoginTime = ($stmt->fetch()[0]);
-                    }
+        if ($failedLoginCount >= 5) {
+            //Assuming theres 5 failed logins from this IP now check the timestamp to lock them out for 3 minutes
+            $checkTime = "SELECT `timeStamp` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
+            $stmt = $conn->prepare($checkTime);
+            $stmt->bindParam(1, $ipAddr);
+            $result = $stmt->execute();
 
+            if(!$result) {
+                die('Error: ' . $stmt->error);
+            } else {
+                $failedLoginTime = ($stmt->fetch()[0]);
+            }
+
+            $currTime = date("Y-m-d H:i:s");
+            $timeDiff = abs(strtotime($currTime) - strtotime($failedLoginTime));
+            $_SESSION['timeLeft'] = 180 - $timeDiff; //Print to inform user of how many seconds remain on the lockout
+
+            if((int)$timeDiff <= 180) {
+                $_SESSION['lockedOut'] = "Due to multiple failed logins you're now locked out, please try again in 3 minutes"; //Should also stop user if they try to register
+
+                //Store unsuccessful login attempt, uid, timestamp, IP in log format for viewing at admin.php
+                $time = date("Y-m-d H:i:s");
+                $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'fail')"; //$ipAddr, $time, $uid
+                $stmt = $conn->prepare($recordLogin);
+                $stmt->bindParam(1, $ipAddr);
+                $stmt->bindParam(2, $time);
+                $stmt->bindParam(3, cleanChars($uid));
+
+                if(!$stmt->execute()) {
+                    die("Errory: " . $stmt->error);
+                }
+                //Redirect given lockout is currently enabled
+                header("location: ../index.php");
+                
+            } else {
+
+                //Update lockOutCount
+                $updateLockOutCount = "UPDATE `failedLogins` SET `lockOutCount` = `lockOutCount` + 1 WHERE `ip` = ?"; //$ipAddr
+                $stmt = $conn->prepare($updateLockOutCount);
+                $stmt->bindParam(1, $ipAddr);
+
+                if(!$stmt->execute()) {
+                    die("Errorz: " . $stmt->error);
+                } else {
+
+                    //Otherwise update the lockout counter/timestamp
                     $currTime = date("Y-m-d H:i:s");
-                    $timeDiff = abs(strtotime($currTime) - strtotime($failedLoginTime));
-                    $_SESSION['timeLeft'] = 180 - $timeDiff; //Print to inform user of how many seconds remain on the lockout
+                    $updateCount = "UPDATE `failedLogins` SET `failedLoginCount` = '0', `timeStamp` = ? WHERE `ip` = ?"; //$currTime, $ipAddr
+                    $stmt = $conn->prepare($updateCount);
+                    $stmt->bindParam(1, $currTime);
+                    $stmt->bindParam(2, $ipAddr);
 
-                    if((int)$timeDiff <= 180) {
-                        $_SESSION['lockedOut'] = "Due to multiple failed logins you're now locked out, please try again in 3 minutes"; //Should also stop user if they try to register
-
-                        //Store unsuccessful login attempt, uid, timestamp, IP in log format for viewing at admin.php
-                        $time = date("Y-m-d H:i:s");
-                        $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'fail')"; //$ipAddr, $time, $uid
-                        $stmt = $conn->prepare($recordLogin);
-                        $stmt->bindParam(1, $ipAddr);
-                        $stmt->bindParam(2, $time);
-                        $stmt->bindParam(3, cleanChars($uid));
-
-                        if(!$stmt->execute()) {
-                            die("Errory: " . $stmt->error);
-                        }
-                        //Redirect given lockout is currently enabled
-                        header("location: ../index.php");
-                        
-                    } else {
-
-                        //Update lockOutCount
-                        $updateLockOutCount = "UPDATE `failedLogins` SET `lockOutCount` = `lockOutCount` + 1 WHERE `ip` = ?"; //$ipAddr
-                        $stmt = $conn->prepare($updateLockOutCount);
-                        $stmt->bindParam(1, $ipAddr);
-
-                        if(!$stmt->execute()) {
-                            die("Errorz: " . $stmt->error);
-                        } else {
-
-                            //Otherwise update the lockout counter/timestamp
-                            $currTime = date("Y-m-d H:i:s");
-                            $updateCount = "UPDATE `failedLogins` SET `failedLoginCount` = '0', `timeStamp` = ? WHERE `ip` = ?"; //$currTime, $ipAddr
-                            $stmt = $conn->prepare($updateCount);
-                            $stmt->bindParam(1, $currTime);
-                            $stmt->bindParam(2, $ipAddr);
-
-                            if(!$stmt->execute()) {
-                                die("Error: " . $stmt->error);
-                            }
-                            
-                            processLogin($conn,$uid,$pwd,$ipAddr); 
-                        }
+                    if(!$stmt->execute()) {
+                        die("Error: " . $stmt->error);
                     }
                     
-                } else {
-                    processLogin($conn,$uid,$pwd,$ipAddr);
+                    processLogin($conn,$uid,$pwd,$ipAddr); 
                 }
             }
+            
+        } else {
+            processLogin($conn,$uid,$pwd,$ipAddr);
+        }
     }
+    else {
+    }// here!!!
 }
 
 function processLogin($conn, $uid, $pwd, $ipAddr) {
@@ -171,10 +174,10 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
 
         if(!$stmt->execute()) {
             die("Errorx: " . $stmt->error);
-        } else {
-            header("Location: ../auth1.php");
             exit();
         }
+        header("Location: ../auth1.php");
+        exit();
     }
 } 
 
@@ -193,24 +196,24 @@ function failedLogin ($uid,$ipAddr) {
 
     if(!$stmt->execute()) {
         die("Error 1: " . $stmt->error);
-    } else {
-        //Update failed login count for client
-        $currTime = date("Y-m-d H:i:s");
-        $updateCount = "UPDATE `failedLogins` SET `failedLoginCount` = `failedLoginCount` + 1, `timeStamp` = ? WHERE `ip` = ?"; //$currTime, $ipAddr
-        $stmt = $conn->prepare($updateCount);
-        $stmt->bindParam(1, $currTime);
-        $stmt->bindParam(2, $ipAddr);
+        exit();
+    } 
+    //Update failed login count for client
+    $currTime = date("Y-m-d H:i:s");
+    $updateCount = "UPDATE `failedLogins` SET `failedLoginCount` = `failedLoginCount` + 1, `timeStamp` = ? WHERE `ip` = ?"; //$currTime, $ipAddr
+    $stmt = $conn->prepare($updateCount);
+    $stmt->bindParam(1, $currTime);
+    $stmt->bindParam(2, $ipAddr);
 
-        if(!$stmt->execute()) {
-            die("Error 2: " . $stmt->error);
-        } else {
-            header("Location: ../index.php");
-            exit();
-        }
+    if(!$stmt->execute()) {
+        die("Error 2: " . $stmt->error);
+        exit();
     }
-    
+    header("Location: ../index.php");
+    exit();
 }
 
 function cleanChars($val){
+    
     return htmlspecialchars($val);
 }
