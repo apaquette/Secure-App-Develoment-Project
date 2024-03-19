@@ -1,12 +1,9 @@
-<?php
-    include_once 'header.php';
-?>
+<?php include_once 'header.php'; ?>
 
 <section class="main-container">
     <div class="main-wrapper">
         <h2>Change Password</h2>
         <br>
-        
         <br>
         Please ensure your new password conforms to the complexity rules:
         <br>
@@ -19,18 +16,15 @@
             <input type="password" name="new_confirm" value="" placeholder="Confirm New Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
             <button type="submit" name="reset" value="yes">Reset</button>
             <?php 
-			
-            //Generate CSRF token in Here
-            if (empty($_SESSION['csrf'])) {
-                
-            }
-            
+                //session_start();
+                //Generate CSRF token
+                if (empty($_SESSION['csrf'])) {
+                    $_SESSION['csrf'] = bin2hex(random_bytes(35));
+                }
             ?>
-            
+            <input type="hidden" id="csrf" name="csrf" value="<?php echo $_SESSION['csrf'] ?? '' ?>">
         </form>
     </div>
 </section>
 
-<?php
-    include_once 'footer.php';
-?>
+<?php include_once 'footer.php';?>

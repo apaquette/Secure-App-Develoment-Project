@@ -89,11 +89,11 @@
 			
 			// messages for failure, registration, and reset password error
 			$messages = ['failedMsg', 'register', 'resetError'];
-			foreach($msg in $messages){
-				if(isset($_SESSION[$msg]){
+			foreach($messages as $msg){
+				if(isset($_SESSION[$msg])){
 					echo $_SESSION[$msg];
 					unset($_SESSION[$msg]);
-				})
+				}
 			}
 
 			//Message if locked out 

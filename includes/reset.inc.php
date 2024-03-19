@@ -1,62 +1,59 @@
 <?php
 
-//If user is not logged in or requesting to reset, redirect
-include 'dbh.inc.php';
-session_start();
+    //If user is not logged in or requesting to reset, redirect
+    include 'dbh.inc.php';
+    session_start();
 
-if (!isset($_GET['reset'],$_SESSION['u_uid'])) {
-    $_SESSION['resetError'] = "Error code 1";
-    header("Location: ../index.php");
-} else {
-    $oldpass = $_GET['old'];
-    $newConfirm = $_GET['new_confirm'];
-    $newpass = $_GET['new'];
-
-    if (empty($oldpass || $newpass)) {
-        $_SESSION['resetError'] = "Error code 2";
-    } else {
-        
-        $uid = $_SESSION['u_uid'];
-
-        $checkOld = "SELECT * FROM `sapusers` WHERE `user_uid` = ?"; //$uid
-        $stmt = $conn->prepare($checkOld);
-        $stmt->bindParam(1, $uid);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) { 
-
-            $row = mysqli_fetch_assoc($result); 
-
-			
-            if (strcmp($oldpass, $row['user_pwd']) !== 0) {
-                $_SESSION['resetError'] = "Error code 4";
-                header("Location: ../index.php");
-                exit();
-            } else {
-                if ($newConfirm == $newpass) { //confirm they match
-
-                    $changePass = "UPDATE `sapusers` SET `user_pwd` = ? WHERE `user_uid` = ?"; //$newpass, $uid
-                    $stmt = $conn->prepare($changePass);
-                    $stmt->bindParam(1, $newpass);
-                    $stmt->bindParam(2, $uid);
-                            
-                    if(!$stmt->execute()) {
-                        echo "Error: " . $stmt->error;
-                    }
-
-                    header("Location: ./logout.inc.php");
-                    exit();
-                } else {
-                    $_SESSION['resetError'] = "Error code 5";
-                    header("Location: ../index.php");
-                    exit();
-                }
-            }
-        } else {
-            $_SESSION['resetError'] = "Error code 6"; 
-            header("Location: ../index.php");
-            exit();
-        }
+    // if any of the parameters aren't set, destroy session and return to index
+    if (!isset($_GET['reset'],$_SESSION['u_uid'], $_SESSION['csrf']) || $_GET['csrf'] != $_SESSION['csrf']) {
+        $_SESSION['resetError'] = "Error code 1";
+        session_destroy();
+        header("Location: ../index.php");
     }
-}
+
+    $oldpass = $_GET['old'];            // old password
+    $newpass = $_GET['new'];            // new password
+    $newConfirm = $_GET['new_confirm']; // new password confirm
+    $uid = $_SESSION['u_uid'];          // session uid
+
+    $stmt = $conn->prepare("SELECT * FROM `sapusers` WHERE `user_uid` = ?");
+    $stmt->bindParam(1, $uid);
+    $stmt->execute();
+    
+    // ERROR CHECKING
+    $resetError = null;
+    if (empty($oldpass || $newpass)) { // if old or new passwords are empty
+        $resetError = "Error code 2";
+    } else if($stmt->rowCount() <= 0){ // If there are no rows
+        $resetError = "Error code 6";
+    } else if (strcmp($oldpass, $stmt->fetch()['user_pwd']) !== 0) { //if the password is empty
+        $resetError = "Error code 4";
+    } else if ($newConfirm != $newpass) { //if the passwords don't match
+        $resetError = "Error code 5";
+    }
+
+    //if any errors occured, unset the token and return to the index
+    if($resetError != null){
+        $_SESSION['resetError'] = $resetError; // assign error
+        unset($_SESSION['csrf']); // unset token
+        header("Location: ../index.php"); // navigate to index
+        exit(); //early exit
+    }
+    // ERROR CHECKING END
+
+
+    // CHANGE PASSWORD
+    $changePass = "UPDATE `sapusers` SET `user_pwd` = ? WHERE `user_uid` = ?"; //$newpass, $uid
+    $stmt = $conn->prepare($changePass);
+    $stmt->bindParam(1, $newpass);
+    $stmt->bindParam(2, $uid);
+    
+    //if statement execution fails
+    if(!$stmt->execute()) {
+        echo "Error: " . $stmt->error; // display error
+        unset($_SESSION['csrf']); //unset csrf
+        exit(); //early exit
+    }
+    unset($_SESSION['csrf']);
+    header("Location: ./logout.inc.php");
+?>

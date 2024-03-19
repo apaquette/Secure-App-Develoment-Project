@@ -95,7 +95,7 @@ if (isset($_POST['submit'])) {
                         //Update lockOutCount
                         $updateLockOutCount = "UPDATE `failedLogins` SET `lockOutCount` = `lockOutCount` + 1 WHERE `ip` = ?"; //$ipAddr
                         $stmt = $conn->prepare($updateLockOutCount);
-                        $stmt->bindPram(1, $ipAddr);
+                        $stmt->bindParam(1, $ipAddr);
 
                         if(!$stmt->execute()) {
                             die("Errorz: " . $stmt->error);
