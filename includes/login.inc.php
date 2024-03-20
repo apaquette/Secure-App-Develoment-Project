@@ -32,7 +32,6 @@ if (isset($_POST['submit'])) {
     //New user, insert into database and login
     //"Initialise" attempts recording their IP, timestamp and setup a failed login count, based off IP and attempted uid
     if ($stmt->rowCount() == 0) {
-
         $addUser = "INSERT INTO `failedLogins` (`ip`, `timeStamp`, `failedLoginCount`, `lockOutCount`) VALUES (?, ?, '0', '0')"; //'$ipAddr', '$time'
         $stmt = $conn->prepare($addUser);
         $stmt->bindParam(1, $ipAddr);
@@ -43,8 +42,6 @@ if (isset($_POST['submit'])) {
         }
 
         processLogin($conn,$uid,$pwd,$ipAddr);
-        exit(); // early exit
-        
     }
 
     //Handle subsequent visits for each client
@@ -54,7 +51,6 @@ if (isset($_POST['submit'])) {
 
     if (!$stmt->execute()) {
         die("Error: " . $stmt->error);
-        exit();
     } 
     //Assign count in variable so we can compare it for each failed login
     $failedLoginCount = $stmt->fetch()[0];
@@ -67,10 +63,9 @@ if (isset($_POST['submit'])) {
 
         if(!$stmt->execute()) {
             die('Error: ' . $stmt->error);
-        }else {
-            $failedLoginTime = ($stmt->fetch()[0]);
         }
-
+        $failedLoginTime = ($stmt->fetch()[0]);
+        
         $currTime = date("Y-m-d H:i:s");
         $timeDiff = abs(strtotime($currTime) - strtotime($failedLoginTime));
         $_SESSION['timeLeft'] = 180 - $timeDiff; //Print to inform user of how many seconds remain on the lockout
@@ -126,14 +121,9 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
         exit(); //early exit
     }
 
-    try{
-        $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ? and user_pwd = ?");
-        $stmt->bindParam(1, $uid);
-        $stmt->bindParam(2, $pwd);
-    }catch (Exception $e) {
-        echo 'Caught exception: ',  $e->getMessage(), "\n";
-        failedLogin($e->getMessage(),$ipAddr);
-    }
+    $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ? and user_pwd = ?");
+    $stmt->bindParam(1, $uid);
+    $stmt->bindParam(2, $pwd);
 
     if (!$stmt->execute() || $stmt->rowCount() < 1) {
         failedLogin($uid,$ipAddr);
@@ -168,8 +158,8 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
             exit();
         }
         header("Location: ../auth1.php");
-        exit();
     }
+    exit();
 } 
 
 function failedLogin ($uid,$ipAddr) {
