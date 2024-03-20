@@ -13,6 +13,9 @@ if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
 session_start();
 
 
+//new for sessioin management
+$_SESSION['id'] = 'auth';
+
 if (isset($_POST['submit'])) {
 
     include 'dbh.inc.php';
@@ -118,7 +121,6 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
     if (empty($uid) || empty($pwd)) {
         header("Location: ../index.php?login=empty");
         failedLogin($uid,$ipAddr);
-        exit(); //early exit
     }
 
     $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ? and user_pwd = ?");
@@ -127,7 +129,6 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
 
     if (!$stmt->execute() || $stmt->rowCount() < 1) {
         failedLogin($uid,$ipAddr);
-        exit();
     }
 
     if ($row = $stmt->fetch()) {
@@ -138,7 +139,6 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
 
         if (strcmp($hashedPwdCheck, $pwd) !== 0){
             failedLogin($uid,$ipAddr);
-            exit();
         }
         //Initiate session
         $_SESSION['u_id'] = $row['user_id'];
@@ -154,9 +154,17 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
         $stmt->bindParam(3, cleanChars($uid));
 
         if(!$stmt->execute()) {
-            die("Errorx: " . $stmt->error);
-            exit();
+            die("Error: " . $stmt->error);
         }
+
+        //new for session management
+        // session_regenerate_id();
+        // $_SESSION['Test'] = "Test Value";
+        // setcookie($_SESSION['id'], session_id());
+        // setcookie("test", "testCookie");
+        
+        setcookie("TestCookie", 'something from somewhere');
+
         header("Location: ../auth1.php");
     }
     exit();
@@ -177,7 +185,6 @@ function failedLogin ($uid,$ipAddr) {
 
     if(!$stmt->execute()) {
         die("Error 1: " . $stmt->error);
-        exit();
     } 
     //Update failed login count for client
     $currTime = date("Y-m-d H:i:s");
@@ -188,7 +195,6 @@ function failedLogin ($uid,$ipAddr) {
 
     if(!$stmt->execute()) {
         die("Error 2: " . $stmt->error);
-        exit();
     }
     header("Location: ../index.php");
     exit();

@@ -7,13 +7,10 @@
 				<?php
 					$conn = mysqli_connect("localhost","TEST","");
 					
-					 if(! $conn ) {
+					 if(!$conn) {
 						die('Could not connect: ' . mysql_error());
-					} else {
-					mysqli_query($conn,"CREATE DATABASE secureappdev");
-					
 					}
-					
+					mysqli_query($conn,"CREATE DATABASE secureappdev");
                 ?>
 				
             </div>

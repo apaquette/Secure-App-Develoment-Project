@@ -4,7 +4,7 @@
 
       //Validation here to prevent normal user from accessing directly
       if (!isset($_SESSION['u_id']) || $_SESSION['u_admin'] == 0) {
-            
+            header("Location: index.php");
       } else {
             $user_id = $_SESSION['u_id'];
             $user_uid = $_SESSION['u_uid'];
