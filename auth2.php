@@ -14,15 +14,17 @@
 	<div class="main-wrapper">
 		<h2>Auth page 2</h2>
 		<?php
-			$ViewFile = $_GET['FileToView'];
-
-			if(file_get_contents ("$ViewFile"))    
-			{
-				$FileData = file_get_contents ("$ViewFile");
-				echo $FileData;
-			}else
-			{
+			
+			if(!isset($_GET['FileToView']) || strpos($_GET['FileToView'], '../') !== false || strpos($_GET['FileToView'], '..\\') !== false){
 				echo "no file found";
+			}else{
+				$ViewFile = realpath("C:/xampp/htdocs/Project 24/filesToDisplay/" . $_GET['FileToView']);
+				if($ViewFile && strpos($ViewFile, "C:\\xampp\\htdocs\\Project 24\\filesToDisplay\\") === 0){
+					$FileData = file_get_contents("$ViewFile");
+					echo $FileData;
+				}else{
+					echo "no file found";
+				}
 			}
 		?>
 	</div>

@@ -5,10 +5,10 @@
 	// echo "Test Session is set: " . (isset($_SESSION["Test"]));
 	
 	//THIS DOESN'T WORK WHYYYYYYY
-	echo $_COOKIE["TestCookie"];
+	//echo $_COOKIE["TestCookie"];
 
 	if (!isset($_SESSION['u_id'], $_SESSION['id'])
-		//|| !isset($_COOKIE[$_SESSION['id']])
+		//|| !isset($_COOKIE["TestCookie"])
 		//|| $_COOKIE[$_SESSION['id']] != session_id()
 		) {
 		session_destroy();

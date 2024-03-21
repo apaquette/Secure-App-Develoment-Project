@@ -1,6 +1,6 @@
 <?php
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_only_cookies', 1);
+//ini_set('session.cookie_httponly', 1);
+//ini_set('session.use_only_cookies', 1);
 
 if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
     $ipAddr=$_SERVER['HTTP_CLIENT_IP'];
@@ -11,8 +11,6 @@ if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
 }
 
 session_start();
-
-
 //new for sessioin management
 $_SESSION['id'] = 'auth';
 
@@ -162,8 +160,8 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
         // $_SESSION['Test'] = "Test Value";
         // setcookie($_SESSION['id'], session_id());
         // setcookie("test", "testCookie");
-        
-        setcookie("TestCookie", 'something from somewhere');
+
+        //setcookie("TestCookie", 'something from somewhere');
 
         header("Location: ../auth1.php");
     }
