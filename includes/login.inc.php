@@ -1,6 +1,6 @@
 <?php
-//ini_set('session.cookie_httponly', 1);
-//ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
 
 if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
     $ipAddr=$_SERVER['HTTP_CLIENT_IP'];
@@ -11,28 +11,27 @@ if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
 }
 
 session_start();
-//new for sessioin management
-$_SESSION['id'] = 'auth';
 
 if (isset($_POST['submit'])) {
-
     include 'dbh.inc.php';
 
     //Sanitize inputs
     $uid = cleanChars($_POST['uid']);
-    $pwd = cleanChars($_POST['pwd']);
-    $ipAddr = $ipAddr;
+    $pwd = $_POST['pwd'];
 
     //Does this client has previous failed login attempts?
     $checkClient = "SELECT `failedLoginCount`, `timeStamp` FROM `failedLogins` WHERE `ip` = ?";
     $stmt = $conn->prepare($checkClient);
     $stmt->bindParam(1, $ipAddr);
-    $result = $stmt->execute();
-    $time = date("Y-m-d H:i:s");
 
+    if(!$stmt->execute()) {
+        die("Error: " . $stmt->error);
+    }
+    
     //New user, insert into database and login
     //"Initialise" attempts recording their IP, timestamp and setup a failed login count, based off IP and attempted uid
     if ($stmt->rowCount() == 0) {
+        $time = date("Y-m-d H:i:s");
         $addUser = "INSERT INTO `failedLogins` (`ip`, `timeStamp`, `failedLoginCount`, `lockOutCount`) VALUES (?, ?, '0', '0')"; //'$ipAddr', '$time'
         $stmt = $conn->prepare($addUser);
         $stmt->bindParam(1, $ipAddr);
@@ -80,7 +79,7 @@ if (isset($_POST['submit'])) {
             $stmt = $conn->prepare($recordLogin);
             $stmt->bindParam(1, $ipAddr);
             $stmt->bindParam(2, $time);
-            $stmt->bindParam(3, cleanChars($uid));
+            $stmt->bindParam(3, $uid);
 
             if(!$stmt->execute()) {
                 die("Errory: " . $stmt->error);
@@ -121,9 +120,9 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
         failedLogin($uid,$ipAddr);
     }
 
-    $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ? and user_pwd = ?");
+    $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ?");
     $stmt->bindParam(1, $uid);
-    $stmt->bindParam(2, $pwd);
+    //$stmt->bindParam(2, $pwd);
 
     if (!$stmt->execute() || $stmt->rowCount() < 1) {
         failedLogin($uid,$ipAddr);
@@ -131,7 +130,9 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
 
     if ($row = $stmt->fetch()) {
         //Check password
-        
+        $pwd .= $row['user_salt'];
+        $pwd = hash('sha256', $pwd);
+
         // $pwd inputted from user
         $hashedPwdCheck = $row['user_pwd'];
 
@@ -149,21 +150,15 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
         $stmt = $conn->prepare($recordLogin);
         $stmt->bindParam(1, $ipAddr);
         $stmt->bindParam(2, $time);
-        $stmt->bindParam(3, cleanChars($uid));
+        $stmt->bindParam(3, $uid);
 
         if(!$stmt->execute()) {
             die("Error: " . $stmt->error);
         }
 
-        //new for session management
-        // session_regenerate_id();
-        // $_SESSION['Test'] = "Test Value";
-        // setcookie($_SESSION['id'], session_id());
-        // setcookie("test", "testCookie");
-
-        //setcookie("TestCookie", 'something from somewhere');
-
-        header("Location: ../auth1.php");
+        session_regenerate_id();
+        $_COOKIE['PHPSESSID'] = session_id();
+       header("Location: ../auth1.php");
     }
     exit();
 } 
@@ -171,7 +166,7 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
 function failedLogin ($uid,$ipAddr) {
     include "dbh.inc.php";
     //When login fails redirect to index and set the failedMsg variable so it can be displayed on index
-    $_SESSION['failedMsg'] = "The username " . cleanChars($uid) . " and password could not be authenticated at this moment.";
+    $_SESSION['failedMsg'] = "The username " . $uid . " and password could not be authenticated at this moment.";
     
     //Store unsuccessful login attempt, uid, timestamp, IP in log format for viewing at admin.php
     $time = date("Y-m-d H:i:s");
@@ -179,7 +174,7 @@ function failedLogin ($uid,$ipAddr) {
     $stmt = $conn->prepare($recordLogin);
     $stmt->bindParam(1, $ipAddr);
     $stmt->bindParam(2, $time);
-    $stmt->bindParam(3, cleanChars($uid));
+    $stmt->bindParam(3, $uid);
 
     if(!$stmt->execute()) {
         die("Error 1: " . $stmt->error);

@@ -1,16 +1,7 @@
 <?php
 	include_once 'header.php';
-	//echo "Cookie is set: " . (isset($_COOKIE[$_SESSION['id']]));
-	// echo "Test Cookie is set: " . (isset($_COOKIE["Test"]));
-	// echo "Test Session is set: " . (isset($_SESSION["Test"]));
-	
-	//THIS DOESN'T WORK WHYYYYYYY
-	//echo $_COOKIE["TestCookie"];
-
-	if (!isset($_SESSION['u_id'], $_SESSION['id'])
-		//|| !isset($_COOKIE["TestCookie"])
-		//|| $_COOKIE[$_SESSION['id']] != session_id()
-		) {
+	//Session Validation
+	if (!isset($_SESSION['u_id'], $_COOKIE["PHPSESSID"]) || $_COOKIE["PHPSESSID"] != session_id()) {
 		session_destroy();
 		header("Location: index.php");
 		exit();

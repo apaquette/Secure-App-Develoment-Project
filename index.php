@@ -40,18 +40,27 @@
 						`user_id` int(11) NOT NULL AUTO_INCREMENT,
 						user_uid varchar(256) NOT NULL,
 						user_pwd varchar(256) NOT NULL,
+						user_salt varchar(32) NOT NULL,
 						user_admin int(2) NOT NULL DEFAULT 0,
 						primary key (`user_id`))";
 						
 						$conn->exec($makeUsers);
 						echo "Table 'users' created successfully<br>"; 
+						
+						$salt = bin2hex(random_bytes(16));
+						$saltedPassword = 'AdminPass1!' . $salt;
+						$adminPass = hash('sha256', $saltedPassword);
+						$makeAdmin = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`, `user_salt`, `user_admin`) VALUES ('admin', '" . $adminPass . "','". $salt ."', '1')";
 
-						$makeAdmin = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`, `user_admin`) VALUES ('admin', 'AdminPass1!', '1')";
 						$conn->exec($makeAdmin);
 						echo "Admin Added (Username = admin, Password =AdminPass1!<br>";
+
+						$salt = bin2hex(random_bytes(16));
+						$saltedPassword = 'Password1!' . $salt;
+						$userPass = hash('sha256', $saltedPassword);
+						$makeUser = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`, `user_salt`, `user_admin`) VALUES ('user1', '" . $userPass . "','". $salt ."', '0')";
 						
-						$makeAdmin = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`, `user_admin`) VALUES ('user1', 'Password1!', '0')";
-						$conn->exec($makeAdmin);
+						$conn->exec($makeUser);
 						echo "User Added (Username = user1, Password =Password1!<br>";
 						
 						//Make table to track pre-auth sessions that should be blocked for failed login attempts

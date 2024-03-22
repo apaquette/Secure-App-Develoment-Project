@@ -1,12 +1,10 @@
 <?php
 	include_once 'header.php';
-
-	if(!isset($_SESSION['u_id'])) {
+	//Session Validation
+	if (!isset($_SESSION['u_id'], $_COOKIE["PHPSESSID"]) || $_COOKIE["PHPSESSID"] != session_id()) {
 		session_destroy();
 		header("Location: index.php");
-	}else{
-		$user_id = $_SESSION['u_id'];
-		$user_uid = $_SESSION['u_uid'];
+		exit();
 	}
 ?>
 

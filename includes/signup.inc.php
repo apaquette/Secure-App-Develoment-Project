@@ -38,7 +38,7 @@
             exit();
         }
 
-        $sql = "SELECT * FROM `sapusers` WHERE `user_uid` = ?"; //$uid
+        $sql = "SELECT * FROM `sapusers` WHERE `user_uid` = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(1, $uid);
         $stmt->execute();
@@ -50,11 +50,16 @@
             exit();
         }
 
-        $hashedPWD = $pwd;  // Not hashed or salted 
-        $sql = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`) VALUES (?, ?)"; 
+        $salt = bin2hex(random_bytes(16));
+        $saltedPassword = $pwd . $salt;
+        $hashedPWD = hash('sha256', $saltedPassword);
+
+        $sql = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`, `user_salt`) VALUES (?, ?, ?)"; 
+        
         $stmt = $conn->prepare($sql);
         $stmt->bindParam(1, $uid);
         $stmt->bindParam(2, $hashedPWD);
+        $stmt->bindParam(3, $salt);
         
         if(!$stmt->execute()) {
             echo "Error: " . $stmt->error;
