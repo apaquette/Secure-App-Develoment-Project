@@ -36,10 +36,7 @@ if (isset($_POST['submit'])) {
     $getCount = "SELECT `failedLoginCount` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
     $stmt = ProcessQuery($getCount, $conn, [$ipAddr]);
 
-    //Assign count in variable so we can compare it for each failed login
-    $failedLoginCount = $stmt->fetch()[0];
-
-    if ($failedLoginCount >= 5) {
+    if ($stmt->fetch()[0] >= 5) {
         //Assuming theres 5 failed logins from this IP now check the timestamp to lock them out for 3 minutes
         $checkTime = "SELECT `timeStamp` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
         $stmt = ProcessQuery($checkTime, $conn, [$ipAddr]);
@@ -79,7 +76,7 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
     // Check if inputs are empty
     if (empty($uid) || empty($pwd)) {
         header("Location: ../index.php?login=empty");
-        failedLogin($uid,$ipAddr);
+        failedLogin($conn,$uid,$ipAddr);
     }
 
     $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ?");
@@ -87,7 +84,7 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
     //$stmt->bindParam(2, $pwd);
 
     if (!$stmt->execute() || $stmt->rowCount() < 1) {
-        failedLogin($uid,$ipAddr);
+        failedLogin($conn,$uid,$ipAddr);
     }
 
     if ($row = $stmt->fetch()) {
@@ -99,7 +96,7 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
         $hashedPwdCheck = $row['user_pwd'];
 
         if (strcmp($hashedPwdCheck, $pwd) !== 0){
-            failedLogin($uid,$ipAddr);
+            failedLogin($conn,$uid,$ipAddr);
         }
         //Initiate session
         $_SESSION['u_id'] = $row['user_id'];
@@ -118,8 +115,8 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
     exit();
 } 
 
-function failedLogin ($uid,$ipAddr) {
-    include "dbh.inc.php";
+function failedLogin ($conn, $uid,$ipAddr) {
+    //include "dbh.inc.php";
     //When login fails redirect to index and set the failedMsg variable so it can be displayed on index
     $_SESSION['failedMsg'] = "The username " . $uid . " and password could not be authenticated at this moment.";
     

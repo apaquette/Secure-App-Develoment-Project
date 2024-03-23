@@ -18,9 +18,11 @@
         $checkClient = "SELECT `failedLoginCount` FROM `failedLogins` WHERE `ip` = ?";
         $stmt = ProcessQuery($checkClient, $conn, [$ipAddr]);
 		
-        if ($stmt->fetch()[0] == 5) {
+        if ($stmt->fetch()[0] >= 5) {
             // Looks like a place to lockout after 5 attempts 
 			// time is an issue here as it is not considered
+            
+
         }
         
         // Check for empty fields
