@@ -21,49 +21,29 @@ if (isset($_POST['submit'])) {
 
     //Does this client has previous failed login attempts?
     $checkClient = "SELECT `failedLoginCount`, `timeStamp` FROM `failedLogins` WHERE `ip` = ?";
-    $stmt = $conn->prepare($checkClient);
-    $stmt->bindParam(1, $ipAddr);
-
-    if(!$stmt->execute()) {
-        die("Error: " . $stmt->error);
-    }
+    $stmt = ProcessQuery($checkClient, $conn, [$ipAddr]);
     
     //New user, insert into database and login
     //"Initialise" attempts recording their IP, timestamp and setup a failed login count, based off IP and attempted uid
     if ($stmt->rowCount() == 0) {
         $time = date("Y-m-d H:i:s");
         $addUser = "INSERT INTO `failedLogins` (`ip`, `timeStamp`, `failedLoginCount`, `lockOutCount`) VALUES (?, ?, '0', '0')"; //'$ipAddr', '$time'
-        $stmt = $conn->prepare($addUser);
-        $stmt->bindParam(1, $ipAddr);
-        $stmt->bindParam(2, $time);
-
-        if(!$stmt->execute()) {
-            die("Error: " . $stmt->error);
-        }
-
+        $stmt = ProcessQuery($addUser, $conn, [$ipAddr, $time]);
         processLogin($conn,$uid,$pwd,$ipAddr);
     }
 
     //Handle subsequent visits for each client
     $getCount = "SELECT `failedLoginCount` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
-    $stmt = $conn->prepare($getCount);
-    $stmt->bindParam(1, $ipAddr);
+    $stmt = ProcessQuery($getCount, $conn, [$ipAddr]);
 
-    if (!$stmt->execute()) {
-        die("Error: " . $stmt->error);
-    } 
     //Assign count in variable so we can compare it for each failed login
     $failedLoginCount = $stmt->fetch()[0];
 
     if ($failedLoginCount >= 5) {
         //Assuming theres 5 failed logins from this IP now check the timestamp to lock them out for 3 minutes
         $checkTime = "SELECT `timeStamp` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
-        $stmt = $conn->prepare($checkTime);
-        $stmt->bindParam(1, $ipAddr);
+        $stmt = ProcessQuery($checkTime, $conn, [$ipAddr]);
 
-        if(!$stmt->execute()) {
-            die('Error: ' . $stmt->error);
-        }
         $failedLoginTime = ($stmt->fetch()[0]);
         
         $currTime = date("Y-m-d H:i:s");
@@ -76,14 +56,7 @@ if (isset($_POST['submit'])) {
             //Store unsuccessful login attempt, uid, timestamp, IP in log format for viewing at admin.php
             $time = date("Y-m-d H:i:s");
             $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'fail')"; //$ipAddr, $time, $uid
-            $stmt = $conn->prepare($recordLogin);
-            $stmt->bindParam(1, $ipAddr);
-            $stmt->bindParam(2, $time);
-            $stmt->bindParam(3, $uid);
-
-            if(!$stmt->execute()) {
-                die("Errory: " . $stmt->error);
-            }
+            $stmt = ProcessQuery($recordLogin, $conn, [$ipAddr, $time, $uid]);
             //Redirect given lockout is currently enabled
             header("location: ../index.php");
             exit();
@@ -91,23 +64,12 @@ if (isset($_POST['submit'])) {
 
         //Update lockOutCount
         $updateLockOutCount = "UPDATE `failedLogins` SET `lockOutCount` = `lockOutCount` + 1 WHERE `ip` = ?"; //$ipAddr
-        $stmt = $conn->prepare($updateLockOutCount);
-        $stmt->bindParam(1, $ipAddr);
+        $stmt = ProcessQuery($updateLockOutCount, $conn, [$ipAddr]);
 
-        if(!$stmt->execute()) {
-            die("Error: " . $stmt->error);
-        } else {
-            //Otherwise update the lockout counter/timestamp
-            $currTime = date("Y-m-d H:i:s");
-            $updateCount = "UPDATE `failedLogins` SET `failedLoginCount` = '0', `timeStamp` = ? WHERE `ip` = ?"; //$currTime, $ipAddr
-            $stmt = $conn->prepare($updateCount);
-            $stmt->bindParam(1, $currTime);
-            $stmt->bindParam(2, $ipAddr);
-
-            if(!$stmt->execute()) {
-                die("Error: " . $stmt->error);
-            }
-        }
+        //Otherwise update the lockout counter/timestamp
+        $currTime = date("Y-m-d H:i:s");
+        $updateCount = "UPDATE `failedLogins` SET `failedLoginCount` = '0', `timeStamp` = ? WHERE `ip` = ?"; //$currTime, $ipAddr
+        $stmt = ProcessQuery($updateCount, $conn, [$currTime, $ipAddr]);
     }
     processLogin($conn,$uid,$pwd,$ipAddr);
 }
@@ -147,14 +109,7 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
         //Store successful login attempt, uid, timestamp, IP in log format for viewing at admin.php
         $time = date("Y-m-d H:i:s");
         $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'success')"; 
-        $stmt = $conn->prepare($recordLogin);
-        $stmt->bindParam(1, $ipAddr);
-        $stmt->bindParam(2, $time);
-        $stmt->bindParam(3, $uid);
-
-        if(!$stmt->execute()) {
-            die("Error: " . $stmt->error);
-        }
+        $stmt = ProcessQuery($recordLogin, $conn, [$ipAddr, $time, $uid]);
 
         session_regenerate_id();
         $_COOKIE['PHPSESSID'] = session_id();
@@ -171,24 +126,12 @@ function failedLogin ($uid,$ipAddr) {
     //Store unsuccessful login attempt, uid, timestamp, IP in log format for viewing at admin.php
     $time = date("Y-m-d H:i:s");
     $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'fail')"; //$ipAddr, $time, $uid
-    $stmt = $conn->prepare($recordLogin);
-    $stmt->bindParam(1, $ipAddr);
-    $stmt->bindParam(2, $time);
-    $stmt->bindParam(3, $uid);
+    $stmt = ProcessQuery($recordLogin, $conn, [$ipAddr, $time, $uid]);
 
-    if(!$stmt->execute()) {
-        die("Error 1: " . $stmt->error);
-    } 
     //Update failed login count for client
     $currTime = date("Y-m-d H:i:s");
     $updateCount = "UPDATE `failedLogins` SET `failedLoginCount` = `failedLoginCount` + 1, `timeStamp` = ? WHERE `ip` = ?"; //$currTime, $ipAddr
-    $stmt = $conn->prepare($updateCount);
-    $stmt->bindParam(1, $currTime);
-    $stmt->bindParam(2, $ipAddr);
-
-    if(!$stmt->execute()) {
-        die("Error 2: " . $stmt->error);
-    }
+    $stmt = ProcessQuery($updateCount, $conn, [$currTime, $ipAddr]);
     header("Location: ../index.php");
     exit();
 }

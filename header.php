@@ -6,7 +6,6 @@
     } else {
         $session = 1;
     }
-    
 ?>
 
 <!DOCTYPE html>

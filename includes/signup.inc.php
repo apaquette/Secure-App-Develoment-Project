@@ -3,7 +3,7 @@
         session_start();
         include_once 'dbh.inc.php';
 
-        $uid = $_POST['uid'];
+        $uid = cleanChars($_POST['uid']);
         $pwd = $_POST['pwd'];
 
         if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
@@ -16,9 +16,7 @@
 
         //CHECK IF USER IS LOCKED OUT
         $checkClient = "SELECT `failedLoginCount` FROM `failedLogins` WHERE `ip` = ?";
-        $stmt = $conn->prepare($checkClient);
-        $stmt->bindParam(1, $ipAddr);
-        $stmt->execute();
+        $stmt = ProcessQuery($checkClient, $conn, [$ipAddr]);
 		
         if ($stmt->fetch()[0] == 5) {
             // Looks like a place to lockout after 5 attempts 
@@ -39,9 +37,7 @@
         }
 
         $sql = "SELECT * FROM `sapusers` WHERE `user_uid` = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(1, $uid);
-        $stmt->execute();
+        $stmt = ProcessQuery($sql, $conn, [$uid]);
 
         //If the user already exists, prevent them from signing up
         if ($stmt->rowCount() > 0) {
@@ -55,19 +51,54 @@
         $hashedPWD = hash('sha256', $saltedPassword);
 
         $sql = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`, `user_salt`) VALUES (?, ?, ?)"; 
+        $stmt = ProcessQuery($sql, $conn, [$uid, $hashedPWD, $salt]);
         
-        $stmt = $conn->prepare($sql);
-        $stmt->bindParam(1, $uid);
-        $stmt->bindParam(2, $hashedPWD);
-        $stmt->bindParam(3, $salt);
-        
-        if(!$stmt->execute()) {
-            echo "Error: " . $stmt->error;
-        }
-
         $_SESSION['register'] = "You've successfully registered as " . $uid . ".";
 
         header("Location: ../index.php");
+    }
+
+    function cleanChars($val){
+        $sanitized = '';
+        foreach (str_split($val) as $char) {
+            switch($char){
+                case '&':
+                    $sanitized .= "&amp;";
+                    break;
+                case '<':
+                    $sanitized .= "&lt;";
+                    break;
+                case '>':
+                    $sanitized .= "&gt;";
+                    break;
+                case '"':
+                    $sanitized .= "&quot;";
+                    break;
+                case '\'':
+                    $sanitized .= "&#x27;";
+                    break;
+                case '/':
+                    $sanitized .= "&#x2F;";
+                    break;
+                case '(':
+                    $sanitized .= "&#x00028;";
+                    break;
+                case ')':
+                    $sanitized .= "&#x00029;";
+                    break;
+                case '{':
+                    $sanitized .= "&lcub;";
+                    break;
+                case '}':
+                    $sanitized .= "&rcub;";
+                    break;
+                default:
+                    $sanitized .= $char;
+                    break;
+            }
+        }
+        //return htmlspecialchars($val);
+        return $sanitized;
     }
 
 ?>

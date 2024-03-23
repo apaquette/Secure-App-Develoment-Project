@@ -18,15 +18,13 @@
             <h2>Login Events</h2>
             <div class="admin-entry-count">
                   <?php
-                        $stmt = $conn->prepare("SELECT count(event_id) AS num_rows FROM loginevents");
-                        $stmt->execute();
+                        $stmt = ProcessQuery("SELECT count(event_id) AS num_rows FROM loginevents", $conn);
                         $total = $stmt->fetch()[0];
                   ?>
                   <p><i>Total entry count: <?php echo $total; ?></i></p>
             </div>
             <?php
-                  $stmt = $conn->prepare("SELECT * FROM loginevents");
-                  $stmt->execute();
+                  $stmt = ProcessQuery("SELECT * FROM loginevents", $conn);
                   
                   while ($row = $stmt->fetch()) {
                         $id = $row['event_id'];

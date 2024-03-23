@@ -16,11 +16,9 @@
     $newConfirm = $_GET['new_confirm']; // new password confirm
     $uid = $_SESSION['u_uid'];          // session uid
 
-    $stmt = $conn->prepare("SELECT * FROM `sapusers` WHERE `user_uid` = ?");
-    $stmt->bindParam(1, $uid);
-    $stmt->execute();
     
     // ERROR CHECKING
+    $stmt = ProcessQuery("SELECT * FROM `sapusers` WHERE `user_uid` = ?", $conn, [$uid]);
     $resetError = null;
     if (empty($oldpass || $newpass)) { // if old or new passwords are empty
         $resetError = "Error code 2";
@@ -43,17 +41,23 @@
 
 
     // CHANGE PASSWORD
-    $changePass = "UPDATE `sapusers` SET `user_pwd` = ? WHERE `user_uid` = ?"; //$newpass, $uid
+    $salt = bin2hex(random_bytes(16));
+    $saltedPassword = $newPass . $salt;
+    $hashedPass = hash('sha256', $saltedPassword);
+
+
+    $changePass = "UPDATE `sapusers` SET `user_pwd` = ?, `user_salt` = ? WHERE `user_uid` = ?"; //$newpass, $uid
     $stmt = $conn->prepare($changePass);
-    $stmt->bindParam(1, $newpass);
-    $stmt->bindParam(2, $uid);
+    $stmt->bindParam(1, $hashedPass);
+    $stmt->bindParam(2, $salt);
+    $stmt->bindParam(3, $uid);
+    
+    unset($_SESSION['csrf']); //unset csrf
     
     //if statement execution fails
     if(!$stmt->execute()) {
         echo "Error: " . $stmt->error; // display error
-        unset($_SESSION['csrf']); //unset csrf
         exit(); //early exit
     }
-    unset($_SESSION['csrf']);
     header("Location: ./logout.inc.php");
 ?>
