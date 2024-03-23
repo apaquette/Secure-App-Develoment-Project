@@ -29,7 +29,6 @@ if (isset($_POST['submit'])) {
         $time = date("Y-m-d H:i:s");
         $addUser = "INSERT INTO `failedLogins` (`ip`, `timeStamp`, `failedLoginCount`, `lockOutCount`) VALUES (?, ?, '0', '0')"; //'$ipAddr', '$time'
         $stmt = ProcessQuery($addUser, $conn, [$ipAddr, $time]);
-        processLogin($conn,$uid,$pwd,$ipAddr);
     }
 
     //Handle subsequent visits for each client
@@ -115,7 +114,7 @@ function processLogin($conn, $uid, $pwd, $ipAddr) {
     exit();
 } 
 
-function failedLogin ($conn, $uid,$ipAddr) {
+function failedLogin ($conn,$uid,$ipAddr) {
     //include "dbh.inc.php";
     //When login fails redirect to index and set the failedMsg variable so it can be displayed on index
     $_SESSION['failedMsg'] = "The username " . $uid . " and password could not be authenticated at this moment.";
