@@ -58,21 +58,16 @@
                 <li><a href="index.php">Home</a></li>
      
                 <?php
-                    if (!isset($_SESSION['u_id'])) {
+                    if(!isset($_SESSION['u_id'])) { // logged out
                         echo '<li><a href="register.php">Register</a></li>';
-                    }
-                    if (isset($_SESSION['u_uid'])) {
+                    }else{ // logged in
                         $admin_status = $_SESSION['u_admin'];
-                        if (isset($_SESSION['u_id']) && $admin_status == 1) {
+                        if ($admin_status == 1) {
                             echo '<li><a href="admin.php">Admin</a></li>';
-                            echo '<li><a href="auth1.php">Auth1</a></li>';
-                            echo '<li><a href="auth2.php?FileToView=yellow.txt">Auth2</a></li>';
-                            echo '<li><a href="change.php">Change Password</a></li>';
-                        } else if (isset($_SESSION['u_id'])) {
-                            echo '<li><a href="auth1.php">Auth1</a></li>';
-                            echo '<li><a href="auth2.php?FileToView=yellow.txt">Auth2</a></li>';
-                            echo '<li><a href="change.php">Change Password</a></li>';
-                        } 
+                        }
+                        echo '<li><a href="auth1.php">Auth1</a></li>';
+                        echo '<li><a href="auth2.php?FileToView=yellow.txt">Auth2</a></li>';
+                        echo '<li><a href="change.php">Change Password</a></li>';
                     }
                 ?>
             </ul>
