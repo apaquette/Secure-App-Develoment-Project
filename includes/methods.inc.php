@@ -1,4 +1,14 @@
 <?php
+    function GetIpAddress(){
+        $ipAddr=$_SERVER['REMOTE_ADDR'];
+        if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ipAddr=$_SERVER['HTTP_CLIENT_IP'];
+        } elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ipAddr=$_SERVER['HTTP_X_FORWARDED_FOR'];
+        }
+        return $ipAddr;
+    }
+
     // CHARACTER SANITIAZION
     function CleanChars($val){
         $sanitized = '';

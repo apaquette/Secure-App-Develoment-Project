@@ -1,17 +1,11 @@
 <?php
-    $ipAddr=$_SERVER['REMOTE_ADDR'];
-    if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        $ipAddr=$_SERVER['HTTP_CLIENT_IP'];
-    } elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        $ipAddr=$_SERVER['HTTP_X_FORWARDED_FOR'];
-    }
-
     session_start();
 
     if (isset($_POST['submit'])) {
         include_once 'dbh.inc.php';
         include_once 'methods.inc.php';
 
+        $ipAddr = GetIpAddress();
         $uid = CleanChars($_POST['uid']);
         $pwd = $_POST['pwd'];
         $database = new Database();

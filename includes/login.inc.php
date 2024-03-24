@@ -2,19 +2,13 @@
     ini_set('session.cookie_httponly', 1);
     ini_set('session.use_only_cookies', 1);
 
-    $ipAddr=$_SERVER['REMOTE_ADDR'];
-    if(!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        $ipAddr=$_SERVER['HTTP_CLIENT_IP'];
-    } elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        $ipAddr=$_SERVER['HTTP_X_FORWARDED_FOR'];
-    }
-
     session_start();
 
     if (isset($_POST['submit'])) {
         include 'dbh.inc.php';
         include 'methods.inc.php';
 
+        $ipAddr = GetIpAddress();
         $uid = CleanChars($_POST['uid']); //Sanitize inputs
         $pwd = $_POST['pwd'];
         $database = new Database();
@@ -70,7 +64,7 @@
         $_COOKIE['PHPSESSID'] = session_id();
         
         return true;
-    } 
+    }
 
     function FailedLogin($database,$uid,$ipAddr) {
         //include "dbh.inc.php";
