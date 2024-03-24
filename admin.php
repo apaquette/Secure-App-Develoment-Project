@@ -2,7 +2,6 @@
       include_once 'header.php';
       include_once 'includes/dbh.inc.php';
       include_once 'includes/methods.inc.php';
-
       
       ValidSession();
       
@@ -26,24 +25,25 @@
             <?php
                   $stmt = $database->ProcessQuery("SELECT * FROM loginevents");
                   
-                  while ($row = $stmt->fetch()) {
-                        $id = $row['event_id'];
-                        $ipAddr = $row['ip'];
-                        $time = $row['timeStamp'];
-                        $user_id = $row['user_id'];
-                        $outcome = $row['outcome'];
+                  while ($loginevent = $stmt->fetch()) {
+                        $id = $loginevent['event_id'];
+                        $ipAddr = $loginevent['ip'];
+                        $time = $loginevent['timeStamp'];
+                        $user_id = $loginevent['user_id'];
+                        $outcome = $loginevent['outcome'];
 
-                        echo "<div class='admin-content'>
-                                    Entry ID: <b>$id</b>
-                                    <br>
-                                    <form class='admin-form' method='GET'>
-                                          <label>IP Address: </label><input type='text' name='IP' value='$ipAddr' ><br>
-                                          <label>Timestamp: </label><input type='text' name='timestamp' value='$time' ><br>
-                                          <label>User ID: </label><input type='text' name='timestamp' value='$user_id' ><br>
-                                          <label>Outcome: </label><input type='text' name='timestamp' value='$outcome' >
-                                    </form>
-                                    <br>
-                              </div>";
+                        echo 
+                        "<div class='admin-content'>
+                              Entry ID: <b>$id</b>
+                              <br>
+                              <form class='admin-form' method='GET'>
+                                    <label>IP Address: </label><input type='text' name='IP' value='$ipAddr' ><br>
+                                    <label>Timestamp: </label><input type='text' name='timestamp' value='$time' ><br>
+                                    <label>User ID: </label><input type='text' name='timestamp' value='$user_id' ><br>
+                                    <label>Outcome: </label><input type='text' name='timestamp' value='$outcome' >
+                              </form>
+                              <br>
+                        </div>";
                   }
             ?>
       </div>
