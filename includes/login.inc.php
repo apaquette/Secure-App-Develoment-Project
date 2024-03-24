@@ -15,24 +15,22 @@
         include 'dbh.inc.php';
         include 'methods.inc.php';
 
-        //Sanitize inputs
-        $uid = CleanChars($_POST['uid']);
+        $uid = CleanChars($_POST['uid']); //Sanitize inputs
         $pwd = $_POST['pwd'];
-
         $database = new Database();
 
         InitFailedLogins($database,$checkClient,$ipAddr);
 
         // If is locked out or fails login
-        if(IsLockedOut($database, $ipAddr, $uid) || !ProcessLogin($database,$uid,$pwd,$ipAddr)){
+        if(IsLockedOut($database, $ipAddr, $uid, "logins") || !ProcessLogin($database,$uid,$pwd,$ipAddr)){
             header("location: ../index.php");
             exit();
         }
 
-        header("Location: ../index.php");
+        header("Location: ../auth1.php");
     }
 
-    function ProcessLogin($database,$uid, $pwd, $ipAddr) {
+    function ProcessLogin($database,$uid,$pwd,$ipAddr) {
         // Errors handlers
         // Check if inputs are empty
         $conn = $database->GetConnection();
@@ -43,42 +41,38 @@
 
         $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ?");
         $stmt->bindParam(1, $uid);
-        //$stmt->bindParam(2, $pwd);
 
         if (!$stmt->execute() || $stmt->rowCount() < 1) {
             return FailedLogin($database,$uid,$ipAddr);
         }
 
-        if ($row = $stmt->fetch()) {
-            //Check password
-            $pwd .= $row['user_salt'];
-            $pwd = hash('sha256', $pwd);
+        $user = $stmt->fetch();
+        $pwd .= $user['user_salt'];
+        $pwd = hash('sha256', $pwd);
 
-            // $pwd inputted from user
-            $hashedPwdCheck = $row['user_pwd'];
+        // $pwd inputted from user
+        $hashedPwdCheck = $user['user_pwd'];
 
-            if (strcmp($hashedPwdCheck, $pwd) !== 0){
-                return FailedLogin($database,$uid,$ipAddr);
-            }
-            //Initiate session
-            $_SESSION['u_id'] = $row['user_id'];
-            $_SESSION['u_uid'] = $row['user_uid'];
-            $_SESSION['u_admin'] = $row['user_admin']; //Will be 0 for non admin users
-            
-            //Store successful login attempt, uid, timestamp, IP in log format for viewing at admin.php
-            $time = date("Y-m-d H:i:s");
-            $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'success')"; 
-            $stmt = $database->ProcessQuery($recordLogin, [$ipAddr, $time, $uid]);
-
-            session_regenerate_id();
-            $_COOKIE['PHPSESSID'] = session_id();
-            
-            return true;
+        if (strcmp($hashedPwdCheck, $pwd) !== 0){
+            return FailedLogin($database,$uid,$ipAddr);
         }
-        return false;
+        //Initiate session
+        $_SESSION['u_id'] = $user['user_id'];
+        $_SESSION['u_uid'] = $user['user_uid'];
+        $_SESSION['u_admin'] = $user['user_admin']; //Will be 0 for non admin users
+        
+        //Store successful login attempt, uid, timestamp, IP in log format for viewing at admin.php
+        $time = date("Y-m-d H:i:s");
+        $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'success')"; 
+        $stmt = $database->ProcessQuery($recordLogin, [$ipAddr, $time, $uid]);
+
+        session_regenerate_id();
+        $_COOKIE['PHPSESSID'] = session_id();
+        
+        return true;
     } 
 
-    function FailedLogin($database, $uid,$ipAddr) {
+    function FailedLogin($database,$uid,$ipAddr) {
         //include "dbh.inc.php";
         //When login fails redirect to index and set the failedMsg variable so it can be displayed on index
         $_SESSION['failedMsg'] = "The username " . $uid . " and password could not be authenticated at this moment.";

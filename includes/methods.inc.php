@@ -1,5 +1,5 @@
 <?php
-// CHARACTER SANITIAZION
+    // CHARACTER SANITIAZION
     function CleanChars($val){
         $sanitized = '';
         foreach (str_split($val) as $char) {
@@ -67,7 +67,7 @@
     }
 
     // CHECK IF IP IS LOCKED OUT
-    function IsLockedOut($database, $ipAddr, $uid){
+    function IsLockedOut($database, $ipAddr, $uid, $event){
         $getCount = "SELECT `failedLoginCount` FROM `failedLogins` WHERE `ip` = ?"; //$ipAddr
         $stmt = $database->ProcessQuery($getCount, [$ipAddr]);
 
@@ -83,7 +83,7 @@
             $_SESSION['timeLeft'] = 180 - $timeDiff; //Print to inform user of how many seconds remain on the lockout
 
             if((int)$timeDiff <= 180) {
-                $_SESSION['lockedOut'] = "Due to multiple failed logins you're now locked out, please try again in 3 minutes"; //Should also stop user if they try to register
+                $_SESSION['lockedOut'] = "Due to multiple failed ".$event." you're now locked out, please try again in 3 minutes"; //Should also stop user if they try to register
 
                 //Store unsuccessful login attempt, uid, timestamp, IP in log format for viewing at admin.php
                 $time = date("Y-m-d H:i:s");
@@ -105,6 +105,4 @@
             return false;
         }
     }
-    
-
 ?>
