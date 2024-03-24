@@ -1,4 +1,4 @@
-<?php    
+<?php
     session_start();
 
     // if any of the parameters aren't set, destroy session and return to index

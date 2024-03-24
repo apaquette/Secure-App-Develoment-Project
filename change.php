@@ -1,4 +1,9 @@
-<?php include_once 'header.php'; ?>
+<?php 
+    include_once 'header.php'; 
+    include_once 'includes/methods.inc.php';
+	
+	ValidSession();
+?>
 
 <section class="main-container">
     <div class="main-wrapper">
