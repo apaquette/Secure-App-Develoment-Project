@@ -6,6 +6,9 @@
     } else {
         $session = 1;
     }
+
+    $isLoggedIn = isset($_SESSION['u_id']);
+    $isAdmin = (isset($_SESSION['u_admin']) && $_SESSION['u_admin'] == 1);
 ?>
 
 <!DOCTYPE html>
@@ -56,13 +59,11 @@
         <div class="main-wrapper">
             <ul class="nav-bar">
                 <li><a href="index.php">Home</a></li>
-     
                 <?php
-                    if(!isset($_SESSION['u_id'])) { // logged out
+                    if(!$isLoggedIn) { // logged out
                         echo '<li><a href="register.php">Register</a></li>';
                     }else{ // logged in
-                        $admin_status = $_SESSION['u_admin'];
-                        if ($admin_status == 1) {
+                        if($isAdmin) {// admin panel
                             echo '<li><a href="admin.php">Admin</a></li>';
                         }
                         echo '<li><a href="auth1.php">Auth1</a></li>';
@@ -74,7 +75,7 @@
 
             <div class="nav-login">
                 <?php
-                    if (isset($_SESSION['u_id'])) {
+                    if ($isLoggedIn) {
                         echo '  <form class="" action="includes/logout.inc.php" method="POST">
                         <button type="submit" name="submit"> Log out </button>
                         </form>';
