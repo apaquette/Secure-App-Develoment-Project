@@ -10,8 +10,9 @@
 
     if (isset($_POST['submit'])) {
         include_once 'dbh.inc.php';
+        include_once 'methods.inc.php';
 
-        $uid = cleanChars($_POST['uid']);
+        $uid = CleanChars($_POST['uid']);
         $pwd = $_POST['pwd'];
 
         //Does this client has previous failed login attempts?
@@ -110,48 +111,5 @@
         $stmt = ProcessQuery($updateCount, $conn, [$currTime, $ipAddr]);
         header("Location: ../index.php");
         exit();
-    }
-
-    function cleanChars($val){
-        $sanitized = '';
-        foreach (str_split($val) as $char) {
-            switch($char){
-                case '&':
-                    $sanitized .= "&amp;";
-                    break;
-                case '<':
-                    $sanitized .= "&lt;";
-                    break;
-                case '>':
-                    $sanitized .= "&gt;";
-                    break;
-                case '"':
-                    $sanitized .= "&quot;";
-                    break;
-                case '\'':
-                    $sanitized .= "&#x27;";
-                    break;
-                case '/':
-                    $sanitized .= "&#x2F;";
-                    break;
-                case '(':
-                    $sanitized .= "&#x00028;";
-                    break;
-                case ')':
-                    $sanitized .= "&#x00029;";
-                    break;
-                case '{':
-                    $sanitized .= "&lcub;";
-                    break;
-                case '}':
-                    $sanitized .= "&rcub;";
-                    break;
-                default:
-                    $sanitized .= $char;
-                    break;
-            }
-        }
-        //return htmlspecialchars($val);
-        return $sanitized;
     }
 ?>
