@@ -5,16 +5,17 @@
     if (!isset($_GET['reset'],$_SESSION['u_uid'], $_SESSION['csrf']) || $_GET['csrf'] != $_SESSION['csrf']) {
         $_SESSION['resetError'] = "Error code 1";
         session_destroy();
-    }else{
-        $oldpass = $_GET['old'];            // old password
-        $newpass = $_GET['new'];            // new password
-        $newConfirm = $_GET['new_confirm']; // new password confirm
-        $uid = $_SESSION['u_uid'];          // session uid
+        exit();
+    }
     
-        if(ResetPassword($uid, $oldpass, $newpass, $newConfirm)){
-            header("Location: ./logout.inc.php");
-            exit();
-        }
+    $oldpass = $_GET['old'];            // old password
+    $newpass = $_GET['new'];            // new password
+    $newConfirm = $_GET['new_confirm']; // new password confirm
+    $uid = $_SESSION['u_uid'];          // session uid
+
+    if(ResetPassword($uid, $oldpass, $newpass, $newConfirm)){
+        header("Location: ./logout.inc.php");
+        exit();
     }
 
     header("Location: ../index.php");
