@@ -1,29 +1,29 @@
-<?php
-
-    //If user is not logged in or requesting to reset, redirect
-    include 'dbh.inc.php';
+<?php    
     session_start();
 
     // if any of the parameters aren't set, destroy session and return to index
     if (!isset($_GET['reset'],$_SESSION['u_uid'], $_SESSION['csrf']) || $_GET['csrf'] != $_SESSION['csrf']) {
         $_SESSION['resetError'] = "Error code 1";
         session_destroy();
-        header("Location: ../index.php");
+    }else{
+        $oldpass = $_GET['old'];            // old password
+        $newpass = $_GET['new'];            // new password
+        $newConfirm = $_GET['new_confirm']; // new password confirm
+        $uid = $_SESSION['u_uid'];          // session uid
+    
+        if(ResetPassword($uid, $oldpass, $newpass, $newConfirm)){
+            header("Location: ./logout.inc.php");
+            exit();
+        }
     }
 
-    $oldpass = $_GET['old'];            // old password
-    $newpass = $_GET['new'];            // new password
-    $newConfirm = $_GET['new_confirm']; // new password confirm
-    $uid = $_SESSION['u_uid'];          // session uid
-
-    if(ResetPassword($conn, $uid, $oldpass, $newpass, $newConfirm)){
-        header("Location: ./logout.inc.php");
-    }
     header("Location: ../index.php");
 
-    function ResetPassword($conn, $uid, $oldpass, $newpass, $newConfirm){
+    function ResetPassword($uid, $oldpass, $newpass, $newConfirm){
+        include 'dbh.inc.php';
+        $database = new Database();
         // ERROR CHECKING
-        $stmt = ProcessQuery("SELECT * FROM `sapusers` WHERE `user_uid` = ?", $conn, [$uid]);
+        $stmt = $database->ProcessQuery("SELECT * FROM `sapusers` WHERE `user_uid` = ?", [$uid]);
         $user = $stmt->fetch();
         $oldpassSalted = $oldpass . $user['user_salt'];
         $oldpassHashed = hash('sha256', $oldpassSalted);
@@ -43,7 +43,6 @@
         if($resetError != null){
             $_SESSION['resetError'] = $resetError; // assign error
             unset($_SESSION['csrf']); // unset token
-            header("Location: ../index.php"); // navigate to index
             return false;
         }
         // ERROR CHECKING END
@@ -57,9 +56,9 @@
 
         unset($_SESSION['csrf']); //unset csrf
         $changePass = "UPDATE `sapusers` SET `user_pwd` = ?, `user_salt` = ? WHERE `user_uid` = ?"; //$newpass, $uid
-        $stmt = ProcessQuery($changePass, $conn, [$hashedPass, $salt, $uid]);
+        $stmt = $database->ProcessQuery($changePass, [$hashedPass, $salt, $uid]);
         
         return true;
-        
+
     }
 ?>

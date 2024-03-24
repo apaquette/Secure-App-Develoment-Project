@@ -8,17 +8,13 @@
 			<br><br><br>
 		</form>
 		<?php
-			//DATABASE SETUP
-			// $host = "localhost";
-			// $username = "TEST";
-			// $password = "";
-			
 			echo "<br>";
 					
 			// CREATE DATABASE
 			if (isset($_POST['createDatabase'])) {
 				include_once 'includes/dbh.inc.php';
-				CreateDatabase($host, $username, $password);
+				$dataBase = new Database();
+				$dataBase->Create();
 			}
 
 			echo "<br>";

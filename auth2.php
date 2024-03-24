@@ -1,11 +1,8 @@
 <?php
 	include_once 'header.php';
-	//Session Validation
-	if (!isset($_SESSION['u_id'], $_COOKIE["PHPSESSID"]) || $_COOKIE["PHPSESSID"] != session_id()) {
-		session_destroy();
-		header("Location: index.php");
-		exit();
-	}
+	include_once 'includes/methods.inc.php';
+	
+	ValidSession();
 ?>
 
 <section class="main-container">

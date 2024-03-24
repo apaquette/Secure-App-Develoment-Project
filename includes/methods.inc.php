@@ -42,5 +42,11 @@
         return $sanitized;
     }
 
-    function 
+    // SESSION VALIDATION
+    function ValidSession(){
+        if(!isset($_SESSION['u_id'], $_COOKIE["PHPSESSID"]) || $_COOKIE["PHPSESSID"] != session_id()){
+            session_destroy();
+            header("Location: index.php");
+        }
+    }
 ?>

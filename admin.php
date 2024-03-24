@@ -1,12 +1,11 @@
 <?php
       include_once 'header.php';
       include_once 'includes/dbh.inc.php';
+      include_once 'includes/methods.inc.php';
 
-      //Session Validation
-      if (!isset($_SESSION['u_id'], $_SESSION['u_admin'], $_COOKIE["PHPSESSID"]) || $_COOKIE["PHPSESSID"] != session_id()) {
-            session_destroy();
-            header("Location: index.php");
-      }
+      
+      ValidSession();
+      
       //not an admin, but is logged in
       if($_SESSION['u_admin'] == 0){
             header("Location: index.php");
@@ -18,13 +17,14 @@
             <h2>Login Events</h2>
             <div class="admin-entry-count">
                   <?php
-                        $stmt = ProcessQuery("SELECT count(event_id) AS num_rows FROM loginevents", $conn);
+                        $database = new Database();
+                        $stmt = $database->ProcessQuery("SELECT count(event_id) AS num_rows FROM loginevents");
                         $total = $stmt->fetch()[0];
                   ?>
                   <p><i>Total entry count: <?php echo $total; ?></i></p>
             </div>
             <?php
-                  $stmt = ProcessQuery("SELECT * FROM loginevents", $conn);
+                  $stmt = $database->ProcessQuery("SELECT * FROM loginevents");
                   
                   while ($row = $stmt->fetch()) {
                         $id = $row['event_id'];
