@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
     use PHPUnit\Framework\TestCase;
 
-    class EmailTest extends TestCase{
+    class DatabaseTest extends TestCase{
         public function testGetConnection_TestCase1(): void{
             $database = new Database();
 
