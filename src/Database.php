@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
     class Database{
         private $host = "localhost";
         private $username = "TEST";
@@ -10,7 +10,7 @@
                 $conn = new PDO("mysql:host=$this->host", $this->username, $this->password);
                 $conn->exec("USE $this->name");
             }catch (PDOException $e) {
-                //echo "Error: " . $e->getMessage();
+                throw $e;
             }
             return $conn;
         }
@@ -40,13 +40,13 @@
                 $tempConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
                 $existingDatabases = $tempConn->query("SHOW DATABASES")->fetchAll(PDO::FETCH_COLUMN);
-                echo "<br>";
+                
                                                     
                 if (!in_array('secureappdev', $existingDatabases)) {
                     // Create a new database
                     $sql = "CREATE DATABASE secureappdev";
                     $tempConn->exec($sql);
-                    echo "Database created successfully<br>";
+                    
                     $sql = "USE secureappdev";
                     $tempConn->exec($sql);
                     
@@ -60,7 +60,7 @@
                     primary key (`user_id`))";
                     
                     $tempConn->exec($makeUsers);
-                    echo "Table 'users' created successfully<br>"; 
+                    
                     
                     $salt = bin2hex(random_bytes(16));
                     $saltedPassword = 'AdminPass1!' . $salt;
@@ -68,7 +68,6 @@
                     $makeAdmin = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`, `user_salt`, `user_admin`) VALUES ('admin', '" . $adminPass . "','". $salt ."', '1')";
 
                     $tempConn->exec($makeAdmin);
-                    echo "Admin Added (Username = admin, Password =AdminPass1!<br>";
 
                     $salt = bin2hex(random_bytes(16));
                     $saltedPassword = 'Password1!' . $salt;
@@ -76,7 +75,7 @@
                     $makeUser = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`, `user_salt`, `user_admin`) VALUES ('user1', '" . $userPass . "','". $salt ."', '0')";
                     
                     $tempConn->exec($makeUser);
-                    echo "User Added (Username = user1, Password =Password1!<br>";
+                    
                     
                     //Make table to track pre-auth sessions that should be blocked for failed login attempts
                     $makeCounter = "CREATE TABLE `failedLogins`
@@ -105,6 +104,13 @@
                 echo "Error: " . $e->getMessage();
             }
             $tempConn = null; // Close the database connection
+        }
+
+        public function CreateSuccessMsg(){
+            echo "<br>Database created successfully<br>";
+            echo "Table 'users' created successfully<br>";
+            echo "Admin Added (Username = admin, Password =AdminPass1!<br>";
+            echo "User Added (Username = user1, Password =Password1!<br>";
         }
     }
 ?>
