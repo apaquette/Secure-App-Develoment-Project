@@ -28,5 +28,18 @@
             $this->expectException(PDOException::class);
             $database->GetConnection();
         }
+
+        public function testCreate_TestCase1(): void{
+            $database = new Database();
+            $exception = null;
+
+            try{
+                $database->Create();
+            }catch(Exception $e){
+                $exception = $e;
+            }
+
+            $this->assertNull($exception, 'Exception was thrown');
+        }
     }
 ?>

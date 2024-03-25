@@ -101,7 +101,7 @@
                     $tempConn->exec($loginEvents);
                 }
             } catch (PDOException $e) {
-                echo "Error: " . $e->getMessage();
+                throw $e;
             }
             $tempConn = null; // Close the database connection
         }
