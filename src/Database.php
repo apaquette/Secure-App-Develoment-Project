@@ -105,6 +105,7 @@
                 throw $e;
             }
             $tempConn = null; // Close the database connection
+            return !in_array('secureappdev', $existingDatabases);
         }
 
         public function CreateSuccessMsg(){

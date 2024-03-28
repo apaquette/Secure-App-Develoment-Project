@@ -21,7 +21,7 @@
     header("Location: ../index.php");
 
     function ResetPassword($uid, $oldpass, $newpass, $newConfirm){
-        include 'dbh.inc.php';
+        include '../../src/Database.php';
         $database = new Database();
         // ERROR CHECKING
         $stmt = $database->ProcessQuery("SELECT * FROM `sapusers` WHERE `user_uid` = ?", [$uid]);
@@ -53,7 +53,6 @@
         $salt = bin2hex(random_bytes(16));
         $saltedPassword = $newpass . $salt;
         $hashedPass = hash('sha256', $saltedPassword);
-
 
         unset($_SESSION['csrf']); //unset csrf
         $changePass = "UPDATE `sapusers` SET `user_pwd` = ?, `user_salt` = ? WHERE `user_uid` = ?"; //$newpass, $uid

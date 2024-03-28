@@ -1,6 +1,6 @@
 <?php
       include_once 'header.php';
-      include_once 'includes/dbh.inc.php';
+      include_once '../src/Database.php';
       include_once 'includes/methods.inc.php';
       
       ValidSession();

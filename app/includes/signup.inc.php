@@ -2,7 +2,7 @@
     session_start();
 
     if (isset($_POST['submit'])) {
-        include_once 'dbh.inc.php';
+        include_once '../../src/Database.php';
         include_once 'methods.inc.php';
 
         $ipAddr = GetIpAddress();

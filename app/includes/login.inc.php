@@ -5,7 +5,7 @@
     session_start();
 
     if (isset($_POST['submit'])) {
-        include 'dbh.inc.php';
+        include '../../src/Database.php';
         include 'methods.inc.php';
 
         $ipAddr = GetIpAddress();

@@ -12,9 +12,9 @@
 					
 			// CREATE DATABASE
 			if (isset($_POST['createDatabase'])) {
-				include_once 'includes/dbh.inc.php';
-				$dataBase = new Database();
-				$dataBase->Create();
+				include '../src/Database.php';
+				$database = new Database();
+				if($database->Create()) $database->CreateSuccessMsg();
 			}
 
 			echo "<br>";
