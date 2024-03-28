@@ -23,9 +23,8 @@
                 $stmt->bindParam($i, $params[$i - 1]);
             }
 
-            if(!$stmt->execute()) {
-                die("Error: " . $stmt->error);
-            }
+            if(!$stmt->execute())
+                throw new PDOException($stmt->error);
             
             return $stmt;
         }

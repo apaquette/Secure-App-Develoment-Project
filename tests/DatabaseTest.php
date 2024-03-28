@@ -2,34 +2,44 @@
     use PHPUnit\Framework\TestCase;
 
     class DatabaseTest extends TestCase{
-        public function testGetConnection_TestCase1(): void{
-            $database = new Database();
-
+        private function SetDatabase(): void{
             $tempConn = new PDO("mysql:host=localhost", "TEST", "");
-            //$tempConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $existingDatabases = $tempConn->query("SHOW DATABASES")->fetchAll(PDO::FETCH_COLUMN);
             if (!in_array('secureappdev', $existingDatabases)){
+                $database = new Database();
                 $database->Create(); //create database to ensure it exists
+
             }
             $tempConn = null;
-            $this->assertInstanceOf(PDO::class, $database->GetConnection());
         }
 
-        public function testGetConnection_TestCase2(): void{
+        private function DropDatabase(): void{
             $tempConn = new PDO("mysql:host=localhost", "TEST", "");
-            //$tempConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $existingDatabases = $tempConn->query("SHOW DATABASES")->fetchAll(PDO::FETCH_COLUMN);
             if (in_array('secureappdev', $existingDatabases)){
                 $tempConn->exec("DROP DATABASE secureappdev");//drop database to simulate no database exists scenario
             }
             $tempConn = null;
+        }
+
+        public function testGetConnection_TestCase1():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $this->assertInstanceOf(PDO::class, $database->GetConnection());
+        }
+
+        public function testGetConnection_TestCase2():void{
+            $this->DropDatabase();
 
             $database = new Database();
             $this->expectException(PDOException::class);
             $database->GetConnection();
         }
 
-        public function testCreate_TestCase1(): void{
+        public function testCreate_TestCase1():void{
+            $this->DropDatabase();
+            
             $database = new Database();
             $exception = null;
 
@@ -47,6 +57,61 @@
             $this->expectOutputString($msg);
             $database = new Database();
             $database->CreateSuccessMsg();
+        }
+
+        public function testProcessQuery_TestCase1():void{
+            $this->SetDatabase();
+
+            $database = new Database();
+            $query = "SELECT * FROM sapusers";
+            $this->assertInstanceOf(PDOStatement::class, $database->ProcessQuery($query));
+        }
+
+        public function testProcessQuery_TestCase2():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $query = "SELECT * FROM sapusers WHERE user_admin = ?";
+            $param = [1];
+            $this->assertInstanceOf(PDOStatement::class, $database->ProcessQuery($query, $param));
+        }
+
+        public function testProcessQuery_TestCase3():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $query = "SELECT ? FROM sapusers WHERE user_admin = ? OR user_admin = ?";
+            $param = ["user_salt", 1, 0];
+            $this->assertInstanceOf(PDOStatement::class, $database->ProcessQuery($query, $param));
+        }
+
+        public function testProcessQuery_TestCase4():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $query = "foobar";
+            $this->expectException(PDOException::class);
+            $database->ProcessQuery($query);
+        }
+
+        public function testProcessQuery_TestCase5():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $query = "foobar";
+            $param = [1,2,3];
+            $this->expectException(PDOException::class);
+            $database->ProcessQuery($query, $param);
+        }
+
+        public function testProcessQuery_TestCase6():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $query = "SELECT ? FROM sapusers WHERE user_admin = ? OR user_admin = ?";
+            $param = ["user_salt", 1, 0, 1,2,3,4];
+            $this->expectException(PDOException::class);
+            $database->ProcessQuery($query, $param);
         }
     }
 ?>
