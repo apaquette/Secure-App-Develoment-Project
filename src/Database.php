@@ -17,14 +17,16 @@
 
         // PROCESS QUERY
         public function ProcessQuery($query, $params = []){
+            if($query === null) throw new PDOException("Null query provided");
+            if($query === '') throw new PDOException("Empty query provided");
+
             $conn = $this->GetConnection();
             $stmt = $conn->prepare($query);
             for($i = 1; $i <= sizeof($params); $i++){
                 $stmt->bindParam($i, $params[$i - 1]);
             }
 
-            if(!$stmt->execute())
-                throw new PDOException($stmt->error);
+            if(!$stmt->execute()) throw new PDOException($stmt->error);
             
             return $stmt;
         }

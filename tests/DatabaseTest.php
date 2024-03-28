@@ -113,5 +113,43 @@
             $this->expectException(PDOException::class);
             $database->ProcessQuery($query, $param);
         }
+
+        public function testProcessQuery_TestCase7():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $query = null;
+            $this->expectException(PDOException::class);
+            $database->ProcessQuery($query);
+        }
+
+        public function testProcessQuery_TestCase8():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $query = null;
+            $param = [1,2,3];
+            $this->expectException(PDOException::class);
+            $database->ProcessQuery($query, $param);
+        }
+
+        public function testProcessQuery_TestCase9():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $query = "";
+            $this->expectException(PDOException::class);
+            $database->ProcessQuery($query);
+        }
+
+        public function testProcessQuery_TestCase10():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $query = "SELECT * FROM sapusers";
+            $param = [1,2,3];
+            $this->expectException(PDOException::class);
+            $database->ProcessQuery($query, $param);
+        }
     }
 ?>
