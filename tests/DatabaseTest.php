@@ -41,15 +41,14 @@
             $this->DropDatabase();
             
             $database = new Database();
-            $exception = null;
+            $this->assertTrue($database->Create());
+        }
 
-            try{
-                $database->Create();
-            }catch(Exception $e){
-                $exception = $e;
-            }
-
-            $this->assertNull($exception, 'Exception was thrown');
+        public function testCreate_TestCase2():void{
+            $this->SetDatabase();
+            
+            $database = new Database();
+            $this->assertFalse($database->Create());
         }
 
         public function testCreateSuccessMsg_TestCase1():void{
