@@ -16,7 +16,7 @@
             <h2>Login Events</h2>
             <div class="admin-entry-count">
                   <?php
-                        $database = new Database();
+                        $database = Database::getInstance();
                         $stmt = $database->ProcessQuery("SELECT count(event_id) AS num_rows FROM loginevents");
                         $total = $stmt->fetch()[0];
                   ?>

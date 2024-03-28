@@ -5,6 +5,18 @@
         private $password = "";
         private $name = "secureappdev";
 
+        private static $instance = null;
+
+        private function __construct(){}
+
+        public static function getInstance(){
+            if(self::$instance === null)
+                self::$instance = new Database();
+
+            return self::$instance;
+        }
+
+
         public function GetConnection(){
             try{
                 $conn = new PDO("mysql:host=$this->host", $this->username, $this->password);

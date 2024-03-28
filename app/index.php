@@ -13,7 +13,7 @@
 			// CREATE DATABASE
 			if (isset($_POST['createDatabase'])) {
 				include '../src/Database.php';
-				$database = new Database();
+				$database = Database::getInstance();
 				if($database->Create()) $database->CreateSuccessMsg();
 			}
 

@@ -11,7 +11,7 @@
         $ipAddr = GetIpAddress();
         $uid = CleanChars($_POST['uid']); //Sanitize inputs
         $pwd = $_POST['pwd'];
-        $database = new Database();
+        $database = Database::getInstance();
 
         InitFailedLogins($database,$checkClient,$ipAddr);
 

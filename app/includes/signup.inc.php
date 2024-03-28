@@ -8,7 +8,7 @@
         $ipAddr = GetIpAddress();
         $uid = CleanChars($_POST['uid']);
         $pwd = $_POST['pwd'];
-        $database = new Database();
+        $database = Database::getInstance();
 
         InitFailedLogins($database,$checkClient,$ipAddr);
         if(!IsLockedOut($database, $ipAddr, $uid, "registrations"))
