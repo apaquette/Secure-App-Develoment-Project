@@ -445,6 +445,65 @@
 
             $this->DropDatabase();
         }
-    }
 
+        public function testFailedRegistration_TestCase1():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = "user2";
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->FailedRegistration($uid,$ipAddr));
+
+            $this->DropDatabase();
+        }
+
+        public function testFailedRegistration_TestCase2():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = "user1";
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->FailedRegistration($uid,$ipAddr));
+
+            $this->DropDatabase();
+        }
+
+        public function testFailedRegistration_TestCase3():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = "userTwo";
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->FailedRegistration($uid,$ipAddr));
+
+            $this->DropDatabase();
+        }
+
+        public function testFailedRegistration_TestCase4():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = "";
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->FailedRegistration($uid,$ipAddr));
+
+            $this->DropDatabase();
+        }
+
+        public function testFailedRegistration_TestCase5():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = null;
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->FailedRegistration($uid,$ipAddr));
+
+            $this->DropDatabase();
+        }
+    }
 ?>

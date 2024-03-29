@@ -242,10 +242,11 @@
 
         // PROCESS FAILED REGISTRATION
         function FailedRegistration($uid,$ipAddr){
+            if($uid == null) $uid = "";
             //Store unsuccessful login attempt, uid, timestamp, IP in log format for viewing at admin.php
+            $database = Database::getInstance();
             $time = date("Y-m-d H:i:s");
             $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'fail')"; //$ipAddr, $time, $uid
-            $database = Database::getInstance();
             $stmt = $database->ProcessQuery($recordLogin, [$ipAddr, $time, $uid]);
     
             //Update failed login count for client
@@ -254,6 +255,5 @@
             $stmt = $database->ProcessQuery($updateCount, [$currTime, $ipAddr]);
             return false;
         }
-
     }
 ?>
