@@ -345,8 +345,8 @@
                 $loginManager->FailedLogin($uid, $ipAddr);
             }
 
-            $this->expectException(Exception::class);
-            $loginManager->IsLockedOut($ipAddr, $uid, $event);
+            //$this->expectException(Exception::class);
+            $this->AssertFalse($loginManager->IsLockedOut($ipAddr, $uid, $event));
 
             $this->DropDatabase();
         }

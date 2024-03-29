@@ -18,14 +18,14 @@
                   <?php
                         $database = Database::getInstance();
                         $stmt = $database->ProcessQuery("SELECT count(event_id) AS num_rows FROM loginevents");
-                        $total = $stmt->fetch()[0];
+                        $entryCount = $stmt->fetch()[0];
                   ?>
-                  <p><i>Total entry count: <?php echo $total; ?></i></p>
+                  <p><i>Total entry count: <?php echo $entryCount; ?></i></p>
             </div>
             <?php
-                  $stmt = $database->ProcessQuery("SELECT * FROM loginevents");
+                  $loginevents = $database->ProcessQuery("SELECT * FROM loginevents");
                   
-                  while ($loginevent = $stmt->fetch()) {
+                  while ($loginevent = $loginevents->fetch()) {
                         $id = $loginevent['event_id'];
                         $ipAddr = $loginevent['ip'];
                         $time = $loginevent['timeStamp'];
@@ -48,6 +48,4 @@
             ?>
       </div>
 </section>
-<?php
-      include_once 'footer.php';
-?>
+<?php include_once 'footer.php'; ?>

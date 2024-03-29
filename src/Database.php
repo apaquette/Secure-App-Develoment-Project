@@ -16,6 +16,15 @@
             return self::$instance;
         }
 
+        public function ConnectionExists(){
+            try{
+                $this->GetConnection();
+            }catch(Exception $e){
+                return false;
+            }
+            return true;
+        }
+
 
         public function GetConnection(){
             try{
@@ -54,7 +63,6 @@
 
                 $existingDatabases = $tempConn->query("SHOW DATABASES")->fetchAll(PDO::FETCH_COLUMN);
                 
-                                                    
                 if (!in_array('secureappdev', $existingDatabases)) {
                     // Create a new database
                     $sql = "CREATE DATABASE secureappdev";
@@ -120,11 +128,16 @@
             return !in_array('secureappdev', $existingDatabases);
         }
 
+        // DROP DATABASE
+        public function Drop(){
+            $this->ProcessQuery("DROP DATABASE ".$this->name);
+        }
+
         public function CreateSuccessMsg(){
             echo "<br>Database created successfully<br>";
             echo "Table 'users' created successfully<br>";
-            echo "Admin Added (Username = admin, Password =AdminPass1!<br>";
-            echo "User Added (Username = user1, Password =Password1!<br>";
+            echo "Admin Added (Username = admin, Password = AdminPass1!<br>";
+            echo "User Added (Username = user1, Password = Password1!<br>";
         }
     }
 ?>

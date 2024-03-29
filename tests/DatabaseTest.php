@@ -52,7 +52,7 @@
         }
 
         public function testCreateSuccessMsg_TestCase1():void{
-            $msg = "<br>Database created successfully<br>Table 'users' created successfully<br>Admin Added (Username = admin, Password =AdminPass1!<br>User Added (Username = user1, Password =Password1!<br>";
+            $msg = "<br>Database created successfully<br>Table 'users' created successfully<br>Admin Added (Username = admin, Password = AdminPass1!<br>User Added (Username = user1, Password = Password1!<br>";
             $this->expectOutputString($msg);
             $database = Database::getInstance();
             $database->CreateSuccessMsg();

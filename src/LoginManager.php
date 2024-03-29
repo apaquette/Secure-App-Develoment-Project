@@ -22,7 +22,7 @@
             }
 
 
-            if($ipaddr === null) $ipAddr = "";
+            if($ipAddr === null) $ipAddr = "";
 
             return $ipAddr;
         }
@@ -155,8 +155,7 @@
 
         // CHECK IF IP IS LOCKED OUT
         function IsLockedOut($ipAddr, $uid, $event){
-            if($uid == null)
-                throw new Exception("Null uid");
+            if($uid == null) $uid = "";
             
             $this->InitFailedLogins($ipAddr);
             $database = Database::getInstance();
@@ -197,7 +196,6 @@
             }
             
             return false;
-
         }
 
         // PROCESS REGISTRATION

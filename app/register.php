@@ -12,9 +12,10 @@
 			• Be at least 8 characters long<br>
 			• Contain a mix of uppercase and lowercase<br>
 			• Contain a digit<br>
+            • Contain a special character<br>
             <form class="signup-form" action="includes/signup.inc.php" method="POST">
                 <input type="text" name="uid" value="" placeholder="Username" required>
-                <input type="password" name="pwd" value="" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" required>
+                <input type="password" name="pwd" value="" placeholder="Password" pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?\/\\~-]).{8,}$/" required>
 
                 <button type="submit" name="submit">Register now</button>
             </form>

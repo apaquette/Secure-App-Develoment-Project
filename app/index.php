@@ -14,6 +14,9 @@
 			if (isset($_POST['createDatabase'])) {
 				include '../src/Database.php';
 				$database = Database::getInstance();
+				if($database->ConnectionExists()){
+					$database->Drop();
+				}
 				if($database->Create()) $database->CreateSuccessMsg();
 			}
 
