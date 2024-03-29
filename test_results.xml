@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="C:\xampp\htdocs\Project 24\phpunit.xml" tests="24" assertions="24" errors="0" failures="0" skipped="0" time="1.025142">
+    <testsuite name="My Test Suite" tests="24" assertions="24" errors="0" failures="0" skipped="0" time="1.025142">
+      <testsuite name="DatabaseTest" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" tests="15" assertions="15" errors="0" failures="0" skipped="0" time="0.297823">
+        <testcase name="testGetConnection_TestCase1" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="25" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.014299"/>
+        <testcase name="testGetConnection_TestCase2" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="32" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.025357"/>
+        <testcase name="testCreate_TestCase1" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="40" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.028447"/>
+        <testcase name="testCreate_TestCase2" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="47" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.004489"/>
+        <testcase name="testCreateSuccessMsg_TestCase1" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="54" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.000532"/>
+        <testcase name="testProcessQuery_TestCase1" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="61" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.003715"/>
+        <testcase name="testProcessQuery_TestCase2" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="69" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.034203"/>
+        <testcase name="testProcessQuery_TestCase3" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="78" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.030882"/>
+        <testcase name="testProcessQuery_TestCase4" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="87" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.031312"/>
+        <testcase name="testProcessQuery_TestCase5" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="96" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.031513"/>
+        <testcase name="testProcessQuery_TestCase6" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="106" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.030735"/>
+        <testcase name="testProcessQuery_TestCase7" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="116" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.015985"/>
+        <testcase name="testProcessQuery_TestCase8" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="125" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.015715"/>
+        <testcase name="testProcessQuery_TestCase9" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="135" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.015698"/>
+        <testcase name="testProcessQuery_TestCase10" file="C:\xampp\htdocs\Project 24\tests\DatabaseTest.php" line="144" class="DatabaseTest" classname="DatabaseTest" assertions="1" time="0.014940"/>
+      </testsuite>
+      <testsuite name="LoginManagerTest" file="C:\xampp\htdocs\Project 24\tests\LoginManagerTest.php" tests="9" assertions="9" errors="0" failures="0" skipped="0" time="0.727319">
+        <testcase name="testProcessLogin_TestCase1" file="C:\xampp\htdocs\Project 24\tests\LoginManagerTest.php" line="25" class="LoginManagerTest" classname="LoginManagerTest" assertions="1" time="0.078762"/>
+        <testcase name="testProcessLogin_TestCase2" file="C:\xampp\htdocs\Project 24\tests\LoginManagerTest.php" line="37" class="LoginManagerTest" classname="LoginManagerTest" assertions="1" time="0.107825"/>
+        <testcase name="testProcessLogin_TestCase3" file="C:\xampp\htdocs\Project 24\tests\LoginManagerTest.php" line="49" class="LoginManagerTest" classname="LoginManagerTest" assertions="1" time="0.089868"/>
+        <testcase name="testProcessLogin_TestCase4" file="C:\xampp\htdocs\Project 24\tests\LoginManagerTest.php" line="61" class="LoginManagerTest" classname="LoginManagerTest" assertions="1" time="0.068376"/>
+        <testcase name="testProcessLogin_TestCase5" file="C:\xampp\htdocs\Project 24\tests\LoginManagerTest.php" line="73" class="LoginManagerTest" classname="LoginManagerTest" assertions="1" time="0.111247"/>
+        <testcase name="testProcessLogin_TestCase6" file="C:\xampp\htdocs\Project 24\tests\LoginManagerTest.php" line="85" class="LoginManagerTest" classname="LoginManagerTest" assertions="1" time="0.077993"/>
+        <testcase name="testProcessLogin_TestCase7" file="C:\xampp\htdocs\Project 24\tests\LoginManagerTest.php" line="97" class="LoginManagerTest" classname="LoginManagerTest" assertions="1" time="0.074564"/>
+        <testcase name="testProcessLogin_TestCase8" file="C:\xampp\htdocs\Project 24\tests\LoginManagerTest.php" line="109" class="LoginManagerTest" classname="LoginManagerTest" assertions="1" time="0.070341"/>
+        <testcase name="testProcessLogin_TestCase9" file="C:\xampp\htdocs\Project 24\tests\LoginManagerTest.php" line="121" class="LoginManagerTest" classname="LoginManagerTest" assertions="1" time="0.048343"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

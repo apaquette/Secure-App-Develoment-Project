@@ -8,6 +8,7 @@ $baseDir = dirname($vendorDir);
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'Database' => $baseDir . '/src/Database.php',
+    'LoginManager' => $baseDir . '/src/LoginManager.php',
     'PHPUnit\\Event\\Application\\Finished' => $vendorDir . '/phpunit/phpunit/src/Event/Events/Application/Finished.php',
     'PHPUnit\\Event\\Application\\FinishedSubscriber' => $vendorDir . '/phpunit/phpunit/src/Event/Events/Application/FinishedSubscriber.php',
     'PHPUnit\\Event\\Application\\Started' => $vendorDir . '/phpunit/phpunit/src/Event/Events/Application/Started.php',
