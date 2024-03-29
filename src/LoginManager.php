@@ -2,6 +2,8 @@
     include_once 'Database.php';
     class LoginManager{
         private static $instance = null;
+        private $UidRegex = "/^[a-zA-Z]*$/";
+        private $PwdRegex = '/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?\/\\~-]).{8,}$/';
 
         private function __construct(){ }
 
@@ -32,24 +34,18 @@
             $database = Database::getInstance();
             $conn = $database->GetConnection();
 
-            if($uid == null){
-                $uid = "";
-            }
+            if($uid == null) $uid = "";
 
-            if($pwd == null){
-                $pwd = "";
-            }
+            if($pwd == null) $pwd = "";
 
-            if (empty($uid) || empty($pwd)) {
+            if (empty($uid) || empty($pwd))
                 return $this->FailedLogin($uid,$ipAddr);
-            }
     
             $stmt = $conn->prepare("SELECT * FROM sapusers WHERE user_uid = ?");
             $stmt->bindParam(1, $uid);
     
-            if (!$stmt->execute() || $stmt->rowCount() < 1) {
+            if (!$stmt->execute() || $stmt->rowCount() < 1)
                 return $this->FailedLogin($uid,$ipAddr);
-            }
     
             $user = $stmt->fetch();
             $pwd .= $user['user_salt'];
@@ -58,9 +54,9 @@
             // $pwd inputted from user
             $hashedPwdCheck = $user['user_pwd'];
     
-            if (strcmp($hashedPwdCheck, $pwd) !== 0){
+            if (strcmp($hashedPwdCheck, $pwd) !== 0)
                 return $this->FailedLogin($uid,$ipAddr);
-            }
+            
             //Initiate session
             $_SESSION['u_id'] = $user['user_id'];
             $_SESSION['u_uid'] = $user['user_uid'];
@@ -80,9 +76,8 @@
         // PROCESS FAILED LOGIN
         function FailedLogin($uid,$ipAddr) {
             $this->InitFailedLogins($ipAddr);
-            if($uid == null){
-                $uid = "";
-            }
+            if($uid == null) $uid = "";
+            
             $database = Database::getInstance();
             //When login fails redirect to index and set the failedMsg variable so it can be displayed on index
             $_SESSION['failedMsg'] = "The username " . $uid . " and password could not be authenticated at this moment.";
@@ -109,7 +104,6 @@
             $oldpassHashed = hash('sha256', $oldpassSalted);
     
             $resetError = null;
-            $pattern = '/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?\/\\~-]).{8,}$/';;
             if (empty($oldpass || $newpass)) { // if old or new passwords are empty
                 $resetError = "Error code 2";
             } else if($stmt->rowCount() <= 0){ // If the user doesn't exist
@@ -118,7 +112,7 @@
                 $resetError = "Error code 4";
             } else if ($newConfirm != $newpass) { //if the passwords don't match
                 $resetError = "Error code 5";
-            }else if(!preg_match($pattern, $newpass)){
+            }else if(!preg_match($this->PwdRegex, $newpass)){
                 $resetError = "Fails password requirements";
             }
     
@@ -141,7 +135,6 @@
             $stmt = $database->ProcessQuery($changePass, [$hashedPass, $salt, $uid]);
             
             return true;
-    
         }
 
         // INITIALIZE FAILED LOGINS FOR IP IF IT ISN'T ALREADY
@@ -164,7 +157,6 @@
         function IsLockedOut($ipAddr, $uid, $event){
             if($uid == null)
                 throw new Exception("Null uid");
-            
             
             $this->InitFailedLogins($ipAddr);
             $database = Database::getInstance();
@@ -210,23 +202,30 @@
 
         // PROCESS REGISTRATION
         function ProcessRegistration($uid,$pwd,$ipAddr){
+            if($uid == null) $uid = "";
             // Check for empty fields
             if (empty($uid) || empty($pwd)) {
                 $_SESSION['register'] = "Cannot submit empty username or password.";
-                return FailedRegistration($uid,$ipAddr);
+                return $this->FailedRegistration($uid,$ipAddr);
             }
             
             //Check to make sure only alphabetical characters are used for the username
-            if (!preg_match("/^[a-zA-Z]*$/", $uid)) {
+            if (!preg_match($this->UidRegex, $uid)) {
                 $_SESSION['register'] = "Username must only contain alphabetic characters.";
-                return FailedRegistration($uid,$ipAddr);
+                return $this->FailedRegistration($uid,$ipAddr);
             }
-    
-            $stmt = $this->database->ProcessQuery("SELECT * FROM `sapusers` WHERE `user_uid` = ?", [$uid]);
+
+            if(!preg_match($this->PwdRegex, $pwd)){
+                $_SESSION['register'] = "Password must meet requierements.";
+                return $this->FailedRegistration($uid,$ipAddr);
+            }
+
+            $database = Database::getInstance();
+            $stmt = $database->ProcessQuery("SELECT * FROM `sapusers` WHERE `user_uid` = ?", [$uid]);
             //If the user already exists, prevent them from signing up
             if ($stmt->rowCount() > 0) {
                 $_SESSION['register'] = "Error.";
-                return FailedRegistration($database,$uid,$ipAddr);
+                return $this->FailedRegistration($uid,$ipAddr);
             }
     
             $salt = bin2hex(random_bytes(16));
@@ -234,7 +233,7 @@
             $hashedPWD = hash('sha256', $saltedPassword);
     
             $sql = "INSERT INTO `sapusers` (`user_uid`, `user_pwd`, `user_salt`) VALUES (?, ?, ?)"; 
-            $stmt = $this->database->ProcessQuery($sql, [$uid, $hashedPWD, $salt]);
+            $stmt = $database->ProcessQuery($sql, [$uid, $hashedPWD, $salt]);
             
             $_SESSION['register'] = "You've successfully registered as " . $uid . ".";
 
@@ -246,12 +245,13 @@
             //Store unsuccessful login attempt, uid, timestamp, IP in log format for viewing at admin.php
             $time = date("Y-m-d H:i:s");
             $recordLogin = "INSERT INTO `loginEvents` (`ip`, `timeStamp`, `user_id`, `outcome`) VALUES (?, ?, ?, 'fail')"; //$ipAddr, $time, $uid
-            $stmt = $this->database->ProcessQuery($recordLogin, [$ipAddr, $time, $uid]);
+            $database = Database::getInstance();
+            $stmt = $database->ProcessQuery($recordLogin, [$ipAddr, $time, $uid]);
     
             //Update failed login count for client
             $currTime = date("Y-m-d H:i:s");
             $updateCount = "UPDATE `failedLogins` SET `failedLoginCount` = `failedLoginCount` + 1, `timeStamp` = ? WHERE `ip` = ?"; //$currTime, $ipAddr
-            $stmt = $this->database->ProcessQuery($updateCount, [$currTime, $ipAddr]);
+            $stmt = $database->ProcessQuery($updateCount, [$currTime, $ipAddr]);
             return false;
         }
 

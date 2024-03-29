@@ -351,6 +351,100 @@
             $this->DropDatabase();
         }
 
+        public function testProcessRegistration_TestCase1():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = "userTwo";
+            $pwd = "Password2!";
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertTrue($loginManager->ProcessRegistration($uid, $pwd, $ipAddr));
+            // make sure login works with newly created credentials
+            $this->AssertTrue($loginManager->ProcessLogin($uid, $pwd, $ipAddr));
+
+            $this->DropDatabase();
+        }
+
+        public function testProcessRegistration_TestCase2():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = "user2";
+            $pwd = "Password2!";
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->ProcessRegistration($uid, $pwd, $ipAddr));
+            
+
+            $this->DropDatabase();
+        }
+
+        public function testProcessRegistration_TestCase3():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = "userTwo";
+            $pwd = "PasswordTwo";
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->ProcessRegistration($uid, $pwd, $ipAddr));
+            
+
+            $this->DropDatabase();
+        }
+
+        public function testProcessRegistration_TestCase4():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = "";
+            $pwd = "Password2!";
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->ProcessRegistration($uid, $pwd, $ipAddr));
+
+            $this->DropDatabase();
+        }
+
+        public function testProcessRegistration_TestCase5():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = "userTwo";
+            $pwd = "";
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->ProcessRegistration($uid, $pwd, $ipAddr));
+
+            $this->DropDatabase();
+        }
+
+        public function testProcessRegistration_TestCase6():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = null;
+            $pwd = "Password2!";
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->ProcessRegistration($uid, $pwd, $ipAddr));
+
+            $this->DropDatabase();
+        }
+
+        public function testProcessRegistration_TestCase7():void{
+            $this->SetDatabase();
+            
+            $ipAddr = "testIP";
+            $uid = "userTwo";
+            $pwd = null;
+
+            $loginManager = LoginManager::getInstance();
+            $this->AssertFalse($loginManager->ProcessRegistration($uid, $pwd, $ipAddr));
+
+            $this->DropDatabase();
+        }
     }
 
 ?>
