@@ -108,15 +108,15 @@
                 $resetError = "Error code 2";
             } else if($stmt->rowCount() <= 0){ // If the user doesn't exist
                 $resetError = "Error code 6";
-            } else if (strcmp($oldpassHashed, $user['user_pwd']) !== 0) { //if the old pass doesn't match database pass
+            } else if (strcmp($oldpassHashed, $user['user_pwd']) !== 0) { // if the old pass doesn't match database pass
                 $resetError = "Error code 4";
-            } else if ($newConfirm != $newpass) { //if the passwords don't match
+            } else if ($newConfirm != $newpass) { // if the passwords don't match
                 $resetError = "Error code 5";
             }else if(!preg_match($this->PwdRegex, $newpass)){
                 $resetError = "Fails password requirements";
             }
     
-            //if any errors occured, unset the token and return to the index
+            // if any errors occured, unset the token and return to the index
             if($resetError != null){
                 $_SESSION['resetError'] = $resetError; // assign error
                 unset($_SESSION['csrf']); // unset token
